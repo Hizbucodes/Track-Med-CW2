@@ -13,10 +13,17 @@ import Firebase
 struct TrackMedApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authViewModel = AuthViewModel()
-    
+
+    @State private var showSplash = true
+    @State private var showOnboarding = true
+
     var body: some Scene {
         WindowGroup {
-            if authViewModel.isAuthenticated {
+            if showSplash {
+                SplashScreenView(isActive: $showSplash)
+            } else if showOnboarding {
+                OnboardingView(isOnboarding: $showOnboarding)
+            } else if authViewModel.isAuthenticated {
                 MainTabView()
                     .environmentObject(authViewModel)
             } else {

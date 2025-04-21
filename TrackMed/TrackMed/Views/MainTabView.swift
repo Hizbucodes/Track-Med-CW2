@@ -15,7 +15,7 @@ struct MainTabView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Content based on selected tab
+        
             Group {
                 if selectedTab == 0 {
                     HomeView()

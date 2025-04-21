@@ -71,7 +71,7 @@ class MapViewModel: ObservableObject {
             ),
             Pharmacy(
                 name: "MediCare Pharmacy",
-                address: "456 Oak Ave",
+                address: "456 A9 road",
                 phoneNumber: "987-654-3210",
                 latitude: userLocation.latitude - 0.01,
                 longitude: userLocation.longitude + 0.01,

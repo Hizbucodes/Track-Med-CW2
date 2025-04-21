@@ -13,6 +13,6 @@ struct User: Identifiable, Codable {
     var email: String
     var name: String
     var profileImageUrl: String?
-    var language: String = "en" // Default language: English
+    var language: String = "en"
     var useBiometricAuth: Bool = false
 }

@@ -18,46 +18,62 @@ struct LoginView: View {
         NavigationView {
             VStack(spacing: 20) {
                 // Logo and app name
-                VStack(spacing: 10) {
+                
                     Image(systemName: "pills.circle.fill")
                         .resizable()
                         .frame(width: 80, height: 80)
                         .foregroundColor(.blue)
+                        .padding(.top, 30)
                     
-                    Text("TrackMed")
+                
+                
+                
+                VStack(alignment: .leading, spacing: 8){
+                    Text("Hello")
                         .font(.largeTitle)
                         .fontWeight(.bold)
+                        .foregroundStyle(Color(.blue))
+                        
                     
-                    Text("Welcome back!")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.bottom, 40)
+                    Text("There!")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Text("Sign in now and start exploring all that our app has to offer. We're exited to welcome you to our community!")
+                        .font(.caption)
+                        .padding(.top, 10)
+                        
+                       
+                }.padding(.bottom, 40)
                 
                 // Email field
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "envelope")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.black)
                         TextField("Email", text: $email)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .overlay(
+                                    RoundedRectangle(cornerRadius: 50)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
                 }
                 
                 // Password field
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "lock")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.black)
                         SecureField("Password", text: $password)
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .overlay(
+                                    RoundedRectangle(cornerRadius: 50) //
+                                        .stroke(Color.gray, lineWidth: 1) //
+                                )
+                   
                 }
                 
                 // Remember me & Forgot password
@@ -68,6 +84,7 @@ struct LoginView: View {
                                 .foregroundColor(rememberMe ? .blue : .gray)
                             Text("Remember me")
                                 .font(.subheadline)
+                                .foregroundStyle(Color(.black))
                         }
                     }
                     
@@ -78,8 +95,10 @@ struct LoginView: View {
                     }
                     .font(.subheadline)
                     .foregroundColor(.blue)
+                    
                 }
                 .padding(.vertical, 8)
+                .padding(.bottom, 80)
                 
                 // Error message
                 if let errorMessage = authViewModel.errorMessage {
@@ -101,11 +120,12 @@ struct LoginView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
+                            
                     }
                 }
                 .padding()
                 .background(Color.blue)
-                .cornerRadius(8)
+                .cornerRadius(50)
                 .disabled(email.isEmpty || password.isEmpty || authViewModel.isLoading)
                 
                 // Sign up option
@@ -120,7 +140,7 @@ struct LoginView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
                 }
-                .padding(.top, 16)
+               
                 
                 Spacer()
             }
@@ -137,6 +157,6 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
-        .environmentObject(AuthViewModel()) // If needed
+        .environmentObject(AuthViewModel())
 }
 
