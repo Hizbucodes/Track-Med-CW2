@@ -167,9 +167,9 @@ struct HomeView: View {
             .navigationTitle("")
             .navigationBarHidden(true)
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-//            .sheet(isPresented: $showNotifications) {
-//                NotificationsView()
-//            }
+            .sheet(isPresented: $showNotifications) {
+                NotificationsView()
+            }
             .sheet(isPresented: $showAddMedication) {
                 AddMedicationView()
                     .environmentObject(medicationViewModel)
