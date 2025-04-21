@@ -102,7 +102,7 @@ class MapViewModel: ObservableObject {
     }
     
     func getDirections(to pharmacy: Pharmacy) {
-        guard let userLocation = userLocation else { return }
+        guard userLocation != nil else { return }
         
         let placemark = MKPlacemark(coordinate: pharmacy.coordinate)
         let mapItem = MKMapItem(placemark: placemark)

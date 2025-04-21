@@ -10,7 +10,7 @@ import SwiftUI
 import Firebase
 
 @main
-struct TrackMedAppp: App {
+struct TrackMedApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authViewModel = AuthViewModel()
     

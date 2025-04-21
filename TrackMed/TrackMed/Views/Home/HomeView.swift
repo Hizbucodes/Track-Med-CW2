@@ -300,3 +300,12 @@ struct MedicationLogRow: View {
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
+
+
+
+#Preview {
+    HomeView()
+        .environmentObject(MedicationViewModel())
+        .environmentObject(AuthViewModel())// If needed
+}
+

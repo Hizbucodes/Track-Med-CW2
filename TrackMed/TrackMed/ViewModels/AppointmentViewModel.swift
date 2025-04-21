@@ -53,7 +53,7 @@ class AppointmentViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let docRef = try db.collection("appointments").addDocument(from: appointment)
+            _ = try db.collection("appointments").addDocument(from: appointment)
             
             if appointment.remindersEnabled {
                 NotificationService.shared.scheduleAppointmentReminder(appointment: appointment)
