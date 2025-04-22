@@ -9,12 +9,15 @@ import SwiftUI
 
 struct HistoryLogView: View {
     @EnvironmentObject var medicationViewModel: MedicationViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var appointmentViewModel: AppointmentViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
-    
+    @Environment(\.presentationMode) var presentationMode
+
     @State private var selectedFilter: MedicationStatus?
     @State private var showClearConfirmation = false
-    
+
+    // MARK: - Medication Filtering
+
     var filteredLogs: [MedicationLog] {
         if let filter = selectedFilter {
             return medicationViewModel.medicationLogs.filter { $0.status == filter }
@@ -22,7 +25,7 @@ struct HistoryLogView: View {
             return medicationViewModel.medicationLogs
         }
     }
-    
+
     var groupedLogs: [String: [MedicationLog]] {
         Dictionary(grouping: filteredLogs) { log in
             if Calendar.current.isDateInToday(log.timeScheduled) {
@@ -36,68 +39,97 @@ struct HistoryLogView: View {
             }
         }
     }
-    
+
     var sortedGroupKeys: [String] {
         groupedLogs.keys.sorted { key1, key2 in
             if key1 == "Today" { return true }
             if key2 == "Today" { return false }
             if key1 == "Yesterday" { return true }
             if key2 == "Yesterday" { return false }
-            
+
             let formatter = DateFormatter()
             formatter.dateFormat = "MMMM d, yyyy"
-            
+
             guard let date1 = formatter.date(from: key1),
                   let date2 = formatter.date(from: key2) else {
                 return key1 < key2
             }
-            
+
             return date1 > date2
         }
     }
-    
+
+    // MARK: - Appointment Filtering
+
+    var filteredAppointments: [Appointment] {
+        switch selectedFilter {
+        case .missed:
+            // Missed: scheduled appointments in the past
+            return appointmentViewModel.missedAppointments
+        case .taken:
+            // Taken: completed appointments
+            return appointmentViewModel.completedAppointments
+        default:
+            // All: show all appointments
+            return appointmentViewModel.appointments
+        }
+    }
+
+    // MARK: - View
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Filter tabs
+                // Filter Tabs
                 HStack(spacing: 0) {
                     FilterTab(title: "All", isSelected: selectedFilter == nil) {
                         selectedFilter = nil
                     }
-                    
                     FilterTab(title: "Taken", isSelected: selectedFilter == .taken) {
                         selectedFilter = .taken
                     }
-                    
                     FilterTab(title: "Missed", isSelected: selectedFilter == .missed) {
                         selectedFilter = .missed
                     }
                 }
                 .padding(.top, 8)
-                
-                if medicationViewModel.isLoading {
+
+                // Content
+                if medicationViewModel.isLoading || appointmentViewModel.isLoading {
                     ProgressView()
                         .padding(.top, 40)
-                } else if filteredLogs.isEmpty {
+                } else if filteredLogs.isEmpty && filteredAppointments.isEmpty {
                     VStack {
                         Spacer()
-                        Text("No medication logs found")
+                        Text("No entries found")
                             .foregroundColor(.secondary)
                         Spacer()
                     }
                 } else {
                     List {
-                        ForEach(sortedGroupKeys, id: \.self) { key in
-                            Section(header: Text(key)) {
-                                ForEach(groupedLogs[key] ?? []) { log in
-                                    MedicationHistoryRow(log: log)
+                        // Medication Logs
+                        if !filteredLogs.isEmpty {
+                            ForEach(sortedGroupKeys, id: \.self) { key in
+                                Section(header: Text(key)) {
+                                    ForEach(groupedLogs[key] ?? []) { log in
+                                        MedicationHistoryRow(log: log)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Appointments
+                        if !filteredAppointments.isEmpty {
+                            Section(header: Text("Appointments")) {
+                                ForEach(filteredAppointments) { appointment in
+                                    AppointmentHistoryRow(appointment: appointment)
                                 }
                             }
                         }
                     }
                     .listStyle(InsetGroupedListStyle())
                 }
-                
+
                 // Clear All Data button
                 Button(action: {
                     showClearConfirmation = true
@@ -128,22 +160,24 @@ struct HistoryLogView: View {
             .onAppear {
                 if let userId = authViewModel.user?.id {
                     medicationViewModel.fetchMedicationLogs(for: userId, status: selectedFilter)
+                    appointmentViewModel.fetchAppointments(for: userId)
                 }
             }
         }
     }
-    
+
     private func clearAllLogs() {
-        // This would implement the logic for clearing all logs
-        // In a real implementation, you'd call a method on the viewModel
+        // Implement the logic for clearing all logs if needed
     }
 }
+
+// MARK: - FilterTab
 
 struct FilterTab: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
@@ -162,32 +196,34 @@ struct FilterTab: View {
     }
 }
 
+// MARK: - MedicationHistoryRow
+
 struct MedicationHistoryRow: View {
     let log: MedicationLog
-    
+
     var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter
     }
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(log.medicationName)
                     .font(.headline)
-                
+
                 Text(log.dosage)
                     .font(.subheadline)
                     .foregroundColor(.gray)
-                
+
                 Text(timeFormatter.string(from: log.timeScheduled))
                     .font(.caption)
                     .foregroundColor(.gray)
             }
-            
+
             Spacer()
-            
+
             Text(log.status.rawValue)
                 .font(.subheadline)
                 .foregroundColor(log.status == .taken ? .green : (log.status == .missed ? .red : .gray))
@@ -200,6 +236,46 @@ struct MedicationHistoryRow: View {
                                 ? Color.green.opacity(0.1)
                                 : (log.status == .missed ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
                         )
+                )
+        }
+    }
+}
+
+// MARK: - AppointmentHistoryRow
+
+struct AppointmentHistoryRow: View {
+    let appointment: Appointment
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(appointment.doctorName)
+                    .font(.headline)
+                Text(appointment.specialty)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Text(appointment.hospital)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("\(appointment.date.formatted(date: .abbreviated, time: .shortened))")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                if let notes = appointment.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer()
+            Text(appointment.status.rawValue)
+                .font(.subheadline)
+                .foregroundColor(appointment.status == .completed ? .green : .blue)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(appointment.status == .completed ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
                 )
         }
     }

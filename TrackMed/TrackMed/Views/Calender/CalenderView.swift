@@ -9,22 +9,29 @@ import SwiftUI
 
 struct CalendarView: View {
     @EnvironmentObject var medicationViewModel: MedicationViewModel
+    @EnvironmentObject var appointmentViewModel: AppointmentViewModel // Add this
+    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var selectedDate = Date()
-    
+
     var selectedDateLogs: [MedicationLog] {
-        medicationViewModel.medicationLogs.filter { log in
-            Calendar.current.isDate(log.timeScheduled, inSameDayAs: selectedDate)
+        medicationViewModel.medicationLogs.filter {
+            Calendar.current.isDate($0.timeScheduled, inSameDayAs: selectedDate)
         }
         .sorted { $0.timeScheduled < $1.timeScheduled }
     }
-    
+
+    var selectedDateAppointments: [Appointment] {
+        appointmentViewModel.appointments(for: selectedDate) // Use the function from AppointmentViewModel
+            .sorted { $0.time < $1.time }
+    }
+
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
+        formatter.dateFormat = "MMMM d, yyyy" // Added year for clarity
         return formatter
     }
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -32,9 +39,9 @@ struct CalendarView: View {
                 HStack {
                     Text(dateFormatter.string(from: selectedDate))
                         .font(.headline)
-                    
+
                     Spacer()
-                    
+
                     Button(action: {
                         selectedDate = Date()
                     }) {
@@ -44,7 +51,7 @@ struct CalendarView: View {
                 }
                 .padding()
                 .background(Color(.systemBackground))
-                
+
                 // Calendar view
                 DatePicker(
                     "",
@@ -54,15 +61,15 @@ struct CalendarView: View {
                 .datePickerStyle(GraphicalDatePickerStyle())
                 .padding()
                 .background(Color(.systemBackground))
-                
-                // Medication schedule for selected date
-                if medicationViewModel.isLoading {
+
+                // Schedule for selected date (Medications and Appointments)
+                if medicationViewModel.isLoading || appointmentViewModel.isLoading {
                     ProgressView()
                         .padding(.top, 40)
-                } else if selectedDateLogs.isEmpty {
+                } else if selectedDateLogs.isEmpty && selectedDateAppointments.isEmpty {
                     VStack {
                         Spacer()
-                        Text("No medications scheduled for this day")
+                        Text("No medications or appointments scheduled for this day")
                             .foregroundColor(.secondary)
                         Spacer()
                     }
@@ -70,13 +77,27 @@ struct CalendarView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 16) {
-                            ForEach(selectedDateLogs) { log in
-                                MedicationLogRow(log: log) {
-                                    medicationViewModel.markMedicationAs(
-                                        log.status == .taken ? .scheduled : .taken,
-                                        logId: log.id ?? "",
-                                        completion: { _ in }
-                                    )
+                            if !selectedDateLogs.isEmpty {
+                                Text("Medications")
+                                    .font(.title3)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                ForEach(selectedDateLogs) { log in
+                                    MedicationLogRow(log: log) {
+                                        medicationViewModel.markMedicationAs(
+                                            log.status == .taken ? .scheduled : .taken,
+                                            logId: log.id ?? "",
+                                            completion: { _ in }
+                                        )
+                                    }
+                                }
+                            }
+
+                            if !selectedDateAppointments.isEmpty {
+                                Text("Appointments")
+                                    .font(.title3)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                ForEach(selectedDateAppointments) { appointment in
+                                    AppointmentScheduleRow(appointment: appointment)
                                 }
                             }
                         }
@@ -88,6 +109,13 @@ struct CalendarView: View {
             .navigationBarItems(leading: Button("Close") {
                 presentationMode.wrappedValue.dismiss()
             })
+            .onAppear {
+                if let userId = authViewModel.user?.id { // Assuming AuthViewModel is available if needed
+                    appointmentViewModel.fetchAppointments(for: userId) // Ensure appointments are fetched
+                }
+            }
         }
     }
 }
+
+// Ensure AppointmentScheduleRow and MedicationLogRow are defined elsewhere

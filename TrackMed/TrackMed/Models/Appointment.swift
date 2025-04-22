@@ -26,5 +26,6 @@ struct Appointment: Identifiable, Codable {
         case scheduled = "Scheduled"
         case completed = "Completed"
         case cancelled = "Cancelled"
+        case missed = "Missed"
     }
 }
