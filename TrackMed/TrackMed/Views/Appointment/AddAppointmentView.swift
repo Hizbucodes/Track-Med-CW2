@@ -32,7 +32,6 @@ struct AddAppointmentView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
@@ -60,7 +59,7 @@ struct AddAppointmentView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Doctor name
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Doctor name")
                             .font(.subheadline)
@@ -79,7 +78,7 @@ struct AddAppointmentView: View {
                         )
                     }
                     
-                    // Hospital
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Consultant Hospital or channeling center")
                             .font(.subheadline)
@@ -98,7 +97,7 @@ struct AddAppointmentView: View {
                         )
                     }
                     
-                    // Specialty
+                
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Specialty")
                             .font(.subheadline)
@@ -117,7 +116,7 @@ struct AddAppointmentView: View {
                         )
                     }
                     
-                    // Who's Appointment
+                
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Who's Appointment")
                             .font(.subheadline)
@@ -144,7 +143,7 @@ struct AddAppointmentView: View {
                         }
                     }
                     
-                    // Date and Time
+                    
                     HStack(spacing: 15) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Appointment Date")
@@ -182,7 +181,7 @@ struct AddAppointmentView: View {
                                 Image(systemName: "clock")
                                     .foregroundColor(.gray)
                                 
-                                // Time picker will use default system picker
+                        
                                 DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
                                     .labelsHidden()
                                     .frame(maxWidth: .infinity)
@@ -196,7 +195,7 @@ struct AddAppointmentView: View {
                         .frame(maxWidth: .infinity)
                     }
                     
-                    // Notes
+                
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Appointment Note")
                             .font(.subheadline)
@@ -223,7 +222,7 @@ struct AddAppointmentView: View {
                             )
                     }
                     
-                    // Reminders
+                    
                     HStack {
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
@@ -239,7 +238,7 @@ struct AddAppointmentView: View {
                             Text("Reminders")
                                 .font(.headline)
                             
-                            Text("Get notified when it's time to take your medication")
+                            Text("Get notified when it's time for appointment schedule")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
@@ -255,7 +254,7 @@ struct AddAppointmentView: View {
                     
                     Spacer(minLength: 30)
                     
-                    // Add Appointment Button
+                    
                     Button(action: addAppointment) {
                         Text("Add Appointment")
                             .fontWeight(.semibold)
@@ -267,7 +266,7 @@ struct AddAppointmentView: View {
                     }
                     .disabled(doctorName.isEmpty || hospital.isEmpty || specialty.isEmpty || viewModel.isLoading)
                     
-                    // Cancel Button
+                    
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -296,7 +295,7 @@ struct AddAppointmentView: View {
     private func addAppointment() {
         guard let userId = authViewModel.user?.id else { return }
         
-        // Combine date and time
+        
         let calendar = Calendar.current
         let timeComponents = calendar.dateComponents([.hour, .minute], from: time)
         
@@ -312,7 +311,7 @@ struct AddAppointmentView: View {
             hospital: hospital,
             specialty: specialty,
             forWhom: forWhom,
-            date: date,
+            date: combinedDateTime,
             time: combinedDateTime,
             notes: notes.isEmpty ? nil : notes,
             remindersEnabled: remindersEnabled,
@@ -327,7 +326,7 @@ struct AddAppointmentView: View {
     }
 }
 
-// Helper view for the date picker sheet
+
 struct DatePickerSheet: View {
     @Binding var selectedDate: Date
     @Binding var isPresented: Bool
@@ -359,7 +358,7 @@ struct DatePickerSheet: View {
     }
 }
 
-// Helper view for the who options sheet
+
 struct WhoOptionsSheet: View {
     @Binding var selectedOption: String
     let options: [String]

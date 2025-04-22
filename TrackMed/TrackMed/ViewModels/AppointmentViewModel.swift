@@ -87,14 +87,15 @@ class AppointmentViewModel: ObservableObject {
     
     func addAppointment(_ appointment: Appointment, completion: @escaping (Bool) -> Void) {
         isLoading = true
-        
+
         do {
             _ = try db.collection("appointments").addDocument(from: appointment)
-            
+
             if appointment.remindersEnabled {
                 NotificationService.shared.scheduleAppointmentReminder(appointment: appointment)
+                NotificationService.shared.scheduleAppointmentAtTime(appointment: appointment)
             }
-            
+
             isLoading = false
             completion(true)
         } catch {
@@ -103,26 +104,27 @@ class AppointmentViewModel: ObservableObject {
             completion(false)
         }
     }
-    
+
     func updateAppointment(_ appointment: Appointment, completion: @escaping (Bool) -> Void) {
         guard let id = appointment.id else {
             errorMessage = "Appointment ID is missing"
             completion(false)
             return
         }
-        
+
         isLoading = true
-        
+
         do {
             try db.collection("appointments").document(id).setData(from: appointment)
+
             
-            // Update notification
             NotificationService.shared.cancelAppointmentNotification(appointmentId: id)
-            
+
             if appointment.remindersEnabled {
                 NotificationService.shared.scheduleAppointmentReminder(appointment: appointment)
+                NotificationService.shared.scheduleAppointmentAtTime(appointment: appointment)
             }
-            
+
             isLoading = false
             completion(true)
         } catch {
@@ -131,6 +133,7 @@ class AppointmentViewModel: ObservableObject {
             completion(false)
         }
     }
+
     
     func deleteAppointment(id: String, completion: @escaping (Bool) -> Void) {
         isLoading = true
@@ -160,8 +163,31 @@ class AppointmentViewModel: ObservableObject {
                 self.errorMessage = "Error updating appointment status: \(error.localizedDescription)"
                 completion(false)
             } else {
+                if status == .completed || status == .cancelled {
+                    NotificationService.shared.cancelAppointmentNotification(appointmentId: id)
+                }
+                
+                if status == .cancelled {
+                    self.db.collection("appointments").document(id).getDocument { snapshot, error in
+                        if let appointment = try? snapshot?.data(as: Appointment.self) {
+                            NotificationService.shared.scheduleAppointmentCancelledNotification(appointment: appointment)
+                        }
+                    }
+                }
+                
+                if status == .completed {
+                    self.db.collection("appointments").document(id).getDocument { snapshot, error in
+                        if let appointment = try? snapshot?.data(as: Appointment.self) {
+                            NotificationService.shared.scheduleAppointmentCompletedNotification(appointment: appointment)
+                        }
+                    }
+                }
                 completion(true)
             }
         }
     }
+
+
+
+
 }

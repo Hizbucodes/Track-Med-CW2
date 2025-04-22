@@ -10,6 +10,7 @@ import SwiftUI
 struct NotificationsView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var medicationViewModel: MedicationViewModel
+    @EnvironmentObject var appointmentViewModel: AppointmentViewModel
     
     @State private var notifications: [NotificationItem] = []
     
@@ -47,7 +48,6 @@ struct NotificationsView: View {
                 presentationMode.wrappedValue.dismiss()
             })
             .onAppear {
-                // Generate sample notifications based on upcoming medications
                 generateSampleNotifications()
             }
         }
@@ -56,7 +56,7 @@ struct NotificationsView: View {
     private func generateSampleNotifications() {
         let calendar = Calendar.current
         
-        // Today's medications
+
         let todayLogs = medicationViewModel.medicationLogs.filter { Calendar.current.isDateInToday($0.timeScheduled) }
             .sorted { $0.timeScheduled < $1.timeScheduled }
         
@@ -78,7 +78,24 @@ struct NotificationsView: View {
             }
         }
         
-        // Add a refill reminder if applicable
+    
+                let todayAppointments = appointmentViewModel.appointments.filter {
+                    Calendar.current.isDateInToday($0.date)
+                }
+                for appointment in todayAppointments {
+                    notificationItems.append(
+                        NotificationItem(
+                            id: "appointment_\(appointment.id ?? "")",
+                            title: "Appointment Reminder",
+                            message: "\(appointment.doctorName) at \(appointment.hospital)",
+                            time: appointment.date,
+                            type: .appointment
+                        )
+                    )
+                }
+        
+        
+    
         let lowSupplyMeds = medicationViewModel.medications.filter { med in
             guard let current = med.currentSupply, let total = med.totalSupply else { return false }
             return Double(current) / Double(total) <= 0.2
