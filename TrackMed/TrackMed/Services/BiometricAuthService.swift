@@ -26,7 +26,7 @@ class BiometricAuthService {
                     return .touchID
                 case .faceID:
                     return .faceID
-                default:
+                 default:
                     return .none
                 }
             } else {
@@ -35,6 +35,16 @@ class BiometricAuthService {
         }
         
         return .none
+    }
+    
+    static func isBiometricAvailable() -> (Bool, String?) {
+        let context = LAContext()
+        var error: NSError?
+        
+        let available = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        let errorMessage = error?.localizedDescription
+        
+        return (available, errorMessage)
     }
     
     static func authenticate(completion: @escaping (Bool, String?) -> Void) {

@@ -140,26 +140,19 @@ class AuthViewModel: ObservableObject {
         saveUserData(user: currentUser)
     }
     
+    // AuthViewModel.swift
     func authenticateWithBiometrics(completion: @escaping (Bool) -> Void) {
-        let context = LAContext()
-        var error: NSError?
-        
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            let reason = "Authenticate to access your medical data"
-            
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
-                DispatchQueue.main.async {
-                    if success {
-                        completion(true)
-                    } else {
-                        self.errorMessage = authenticationError?.localizedDescription
-                        completion(false)
-                    }
+        BiometricAuthService.authenticate { [weak self] success, error in
+            DispatchQueue.main.async {
+                if success {
+                    self?.isAuthenticated = true // Auto-login on success
+                } else {
+                    self?.errorMessage = error ?? "Biometric authentication failed"
                 }
+                completion(success)
             }
-        } else {
-            self.errorMessage = "Biometric authentication not available"
-            completion(false)
         }
     }
+
+
 }

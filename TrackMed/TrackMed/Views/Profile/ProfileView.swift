@@ -91,11 +91,22 @@ struct ProfileView: View {
                     }
                     
                     Toggle(isOn: Binding(
-                        get: { authViewModel.user?.useBiometricAuth ?? false },
-                        set: { authViewModel.updateProfile(useBiometricAuth: $0) }
-                    )) {
-                        Label("Face ID / Touch ID", systemImage: "faceid")
-                    }
+                                           get: { authViewModel.user?.useBiometricAuth ?? false },
+                                           set: {
+                                               authViewModel.updateProfile(useBiometricAuth: $0)
+                                               UserDefaults.standard.set($0, forKey: "biometricEnabled")
+                                               if $0 {
+                                                   UserDefaults.standard.set(authViewModel.user?.email, forKey: "biometricEmail")
+                                                   print("Face ID enabled: \(UserDefaults.standard.bool(forKey: "biometricEnabled"))")
+                                                   print("Biometric Email set: \(UserDefaults.standard.string(forKey: "biometricEmail") ?? "nil")")
+                                               } else {
+                                                   UserDefaults.standard.removeObject(forKey: "biometricEmail")
+                                               }
+                                           }
+                                       )) {
+                                           Label("Face ID", systemImage: "faceid")
+                                       }
+
                 }
                 
                 Section {

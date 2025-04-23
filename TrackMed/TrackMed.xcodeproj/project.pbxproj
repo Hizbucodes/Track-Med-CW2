@@ -495,7 +495,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TrackMed/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "We use Face ID to securely unlock your app data.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This allows us to provide nearby location recommendations and directions.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is needed to provide nearby results and directions.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby pharmacies and wellness centers.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -526,7 +531,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TrackMed/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "We use Face ID to securely unlock your app data.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This allows us to provide nearby location recommendations and directions.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is needed to provide nearby results and directions.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby pharmacies and wellness centers.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
