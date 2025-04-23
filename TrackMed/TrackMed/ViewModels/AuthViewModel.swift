@@ -140,6 +140,60 @@ class AuthViewModel: ObservableObject {
         saveUserData(user: currentUser)
     }
     
+    func updatePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+          guard let user = Auth.auth().currentUser else {
+              completion(.failure(NSError(domain: "Auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])))
+              return
+          }
+          
+          // Re-authenticate first
+          let credential = EmailAuthProvider.credential(
+              withEmail: user.email ?? "",
+              password: currentPassword
+          )
+          
+          user.reauthenticate(with: credential) { _, error in
+              if let error = error {
+                  completion(.failure(error))
+                  return
+              }
+              
+              // Update password after successful re-authentication
+              user.updatePassword(to: newPassword) { error in
+                  if let error = error {
+                      completion(.failure(error))
+                  } else {
+                      completion(.success(true))
+                  }
+              }
+          }
+      }
+    
+    
+      func handlePasswordResetError(_ error: Error) -> String {
+          if let errorCode = AuthErrorCode(rawValue: error._code) {
+              switch errorCode {
+              case .invalidEmail:
+                  return "Please enter a valid email address"
+              case .userNotFound:
+                  return "No account found with this email"
+              default:
+                  return error.localizedDescription
+              }
+          }
+          return "Unknown error occurred"
+      }
+      
+      func sendPasswordReset(email: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+          Auth.auth().sendPasswordReset(withEmail: email) { error in
+              if let error = error {
+                  completion(.failure(error))
+              } else {
+                  completion(.success(true))
+              }
+          }
+      }
+    
     // AuthViewModel.swift
     func authenticateWithBiometrics(completion: @escaping (Bool) -> Void) {
         BiometricAuthService.authenticate { [weak self] success, error in

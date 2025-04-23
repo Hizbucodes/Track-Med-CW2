@@ -14,8 +14,33 @@ struct RefillTrackerView: View {
     var refillableMedications: [Medication] {
         medicationViewModel.medications.filter { $0.refillTracking && $0.currentSupply != nil && $0.totalSupply != nil }
     }
+
     
     var body: some View {
+        HStack {
+            Button(action: {
+                presentationMode.wrappedValue.dismiss()
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.blue)
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.white)
+                        .font(.system(size: 18))
+                }
+            }
+            .padding(.trailing, 10)
+            
+            Text("Refill Tracker")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(red: 0.95, green: 0.97, blue: 1.0))
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
@@ -48,10 +73,7 @@ struct RefillTrackerView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Refill Tracker")
-            .navigationBarItems(leading: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
+          
         }
     }
     
@@ -64,6 +86,13 @@ struct RefillTrackerView: View {
 struct RefillCard: View {
     let medication: Medication
     let onRefill: (Int) -> Void
+    
+    // Add this computed property
+    var isFull: Bool {
+        guard let current = medication.currentSupply,
+              let total = medication.totalSupply else { return false }
+        return current >= total
+    }
     
     var statusColor: Color {
         let progress = medication.progress
@@ -137,12 +166,14 @@ struct RefillCard: View {
                 }) {
                     Text("Refill")
                         .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .cornerRadius(20)
+                        .foregroundColor(isFull ? .black : .white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
+                            .padding(.vertical, 6)
+                        .background(isFull ? Color.gray.opacity(0.2) : Color.blue)
+                        .cornerRadius(50)
                 }
+                .disabled(isFull) // Disable when full
             }
         }
         .padding()
@@ -151,6 +182,7 @@ struct RefillCard: View {
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
+
 
 struct ProgressBar: View {
     var value: Double

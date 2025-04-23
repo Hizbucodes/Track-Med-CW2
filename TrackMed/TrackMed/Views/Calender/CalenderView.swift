@@ -33,6 +33,30 @@ struct CalendarView: View {
     }
 
     var body: some View {
+        HStack {
+            Button(action: {
+                presentationMode.wrappedValue.dismiss()
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.blue)
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.white)
+                        .font(.system(size: 18))
+                }
+            }
+            .padding(.trailing, 10)
+            
+            Text("Refill Tracker")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(red: 0.95, green: 0.97, blue: 1.0))
         NavigationView {
             VStack(spacing: 0) {
                 // Calendar header
@@ -105,10 +129,6 @@ struct CalendarView: View {
                     }
                 }
             }
-            .navigationTitle("Calendar")
-            .navigationBarItems(leading: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
             .onAppear {
                 if let userId = authViewModel.user?.id { // Assuming AuthViewModel is available if needed
                     appointmentViewModel.fetchAppointments(for: userId) // Ensure appointments are fetched

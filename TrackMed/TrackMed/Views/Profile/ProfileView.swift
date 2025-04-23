@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -23,6 +24,7 @@ struct ProfileView: View {
     
     var body: some View {
         NavigationView {
+            VStack{
             List {
                 // Profile header
                 VStack {
@@ -55,17 +57,6 @@ struct ProfileView: View {
                         }
                     }
                     
-                    Button(action: { showEditEmail = true }) {
-                        HStack {
-                            Label("Email", systemImage: "envelope.fill")
-                            Spacer()
-                            Text(authViewModel.user?.email ?? "")
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
                     Button(action: { showEditPassword = true }) {
                         HStack {
                             Label("Password", systemImage: "lock.fill")
@@ -91,22 +82,22 @@ struct ProfileView: View {
                     }
                     
                     Toggle(isOn: Binding(
-                                           get: { authViewModel.user?.useBiometricAuth ?? false },
-                                           set: {
-                                               authViewModel.updateProfile(useBiometricAuth: $0)
-                                               UserDefaults.standard.set($0, forKey: "biometricEnabled")
-                                               if $0 {
-                                                   UserDefaults.standard.set(authViewModel.user?.email, forKey: "biometricEmail")
-                                                   print("Face ID enabled: \(UserDefaults.standard.bool(forKey: "biometricEnabled"))")
-                                                   print("Biometric Email set: \(UserDefaults.standard.string(forKey: "biometricEmail") ?? "nil")")
-                                               } else {
-                                                   UserDefaults.standard.removeObject(forKey: "biometricEmail")
-                                               }
-                                           }
-                                       )) {
-                                           Label("Face ID", systemImage: "faceid")
-                                       }
-
+                        get: { authViewModel.user?.useBiometricAuth ?? false },
+                        set: {
+                            authViewModel.updateProfile(useBiometricAuth: $0)
+                            UserDefaults.standard.set($0, forKey: "biometricEnabled")
+                            if $0 {
+                                UserDefaults.standard.set(authViewModel.user?.email, forKey: "biometricEmail")
+                                print("Face ID enabled: \(UserDefaults.standard.bool(forKey: "biometricEnabled"))")
+                                
+                            } else {
+                                UserDefaults.standard.removeObject(forKey: "biometricEmail")
+                            }
+                        }
+                    )) {
+                        Label("Face ID", systemImage: "faceid")
+                    }
+                    
                 }
                 
                 Section {
@@ -123,6 +114,8 @@ struct ProfileView: View {
                 }
             }
             .listStyle(InsetGroupedListStyle())
+        }
+        .padding(.bottom, 40)
             .navigationTitle("Profile")
             .sheet(isPresented: $showEditName) {
                 EditProfileView(
@@ -131,16 +124,9 @@ struct ProfileView: View {
                     onSave: { authViewModel.updateProfile(name: $0) }
                 )
             }
-            .sheet(isPresented: $showEditEmail) {
-                EditProfileView(
-                    title: "Edit Email",
-                    value: authViewModel.user?.email ?? "",
-                    keyboardType: .emailAddress,
-                    onSave: { _ in /* This would update email, but requires re-authentication */ }
-                )
-            }
             .sheet(isPresented: $showEditPassword) {
                 ChangePasswordView()
+                    .environmentObject(authViewModel)
             }
             .sheet(isPresented: $showLanguagePicker) {
                 LanguagePickerView(
@@ -213,7 +199,9 @@ struct ChangePasswordView: View {
     @State private var newPassword = ""
     @State private var confirmPassword = ""
     @State private var errorMessage: String?
+    @State private var isLoading = false
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     var body: some View {
         NavigationView {
@@ -223,7 +211,7 @@ struct ChangePasswordView: View {
                 }
                 
                 Section(header: Text("New Password")) {
-                    SecureField("Enter new password", text: $newPassword)
+                    SecureField("Enter new password (min 6 characters)", text: $newPassword)
                     SecureField("Confirm new password", text: $confirmPassword)
                 }
                 
@@ -235,23 +223,60 @@ struct ChangePasswordView: View {
                 }
                 
                 Section {
-                    Button("Update Password") {
-                        if newPassword == confirmPassword {
-                            // This would call a method on AuthViewModel to change password
-                            // Requires re-authentication
-                            errorMessage = nil
-                            presentationMode.wrappedValue.dismiss()
-                        } else {
-                            errorMessage = "Passwords don't match"
+                    Button(action: updatePassword) {
+                        HStack {
+                            Text("Update Password")
+                            if isLoading {
+                                ProgressView()
+                                    .padding(.leading, 8)
+                            }
                         }
                     }
-                    .disabled(currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty)
+                    .disabled(!formIsValid)
                 }
             }
             .navigationTitle("Change Password")
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
             })
+        }
+    }
+    
+    private var formIsValid: Bool {
+        !currentPassword.isEmpty &&
+        newPassword.count >= 6 &&
+        newPassword == confirmPassword &&
+        !isLoading
+    }
+    
+    private func updatePassword() {
+        guard formIsValid else { return }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        authViewModel.updatePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword
+        ) { result in
+            isLoading = false
+            switch result {
+            case .success:
+                presentationMode.wrappedValue.dismiss()
+            case .failure(let error):
+                handleError(error)
+            }
+        }
+    }
+    
+    private func handleError(_ error: Error) {
+        switch error {
+        case AuthErrorCode.wrongPassword:
+            errorMessage = "Incorrect current password"
+        case AuthErrorCode.weakPassword:
+            errorMessage = "Password should be at least 6 characters"
+        default:
+            errorMessage = error.localizedDescription
         }
     }
 }

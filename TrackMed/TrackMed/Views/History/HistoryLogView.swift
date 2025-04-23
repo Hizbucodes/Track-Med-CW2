@@ -78,6 +78,30 @@ struct HistoryLogView: View {
     // MARK: - View
 
     var body: some View {
+        HStack {
+            Button(action: {
+                presentationMode.wrappedValue.dismiss()
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.blue)
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.white)
+                        .font(.system(size: 18))
+                }
+            }
+            .padding(.trailing, 10)
+            
+            Text("History Log")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color(red: 0.95, green: 0.97, blue: 1.0))
         NavigationView {
             VStack(spacing: 0) {
                 // Filter Tabs
@@ -143,10 +167,7 @@ struct HistoryLogView: View {
                 .cornerRadius(0)
                 .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: -1)
             }
-            .navigationTitle("History Log")
-            .navigationBarItems(leading: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
+           
             .alert(isPresented: $showClearConfirmation) {
                 Alert(
                     title: Text("Clear All Logs"),

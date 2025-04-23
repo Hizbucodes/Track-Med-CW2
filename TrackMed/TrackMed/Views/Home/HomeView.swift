@@ -120,6 +120,7 @@ struct HomeView: View {
                             )
                         }
                     }
+                    .padding(.bottom, 30)
 
                     // Today's Schedule
                     VStack(alignment: .leading, spacing: 12) {
@@ -165,7 +166,7 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 8)
+                .padding(.bottom, 100)
             }
             .navigationTitle("")
             .navigationBarHidden(true)

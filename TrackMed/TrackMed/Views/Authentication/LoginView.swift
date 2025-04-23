@@ -15,6 +15,7 @@ struct LoginView: View {
     @State private var showRegister = false
     @State private var showBiometricError = false
     @State private var biometricErrorMessage: String?
+    @State private var showForgotPassword = false
 
     private var shouldAutoTriggerBiometrics: Bool {
         UserDefaults.standard.bool(forKey: "biometricEnabled") &&
@@ -100,6 +101,7 @@ struct LoginView: View {
 
                     Button("Forgot Password?") {
                         // Handle forgot password
+                        showForgotPassword = true
                     }
                     .font(.subheadline)
                     .foregroundColor(.blue)
@@ -159,6 +161,10 @@ struct LoginView: View {
             }
             .padding(.horizontal, 24)
             .navigationBarHidden(true)
+            .sheet(isPresented: $showForgotPassword) {
+                ForgotPasswordView()
+                    .environmentObject(authViewModel)
+            }
             .fullScreenCover(isPresented: $showRegister) {
                 RegisterView()
                     .environmentObject(authViewModel)

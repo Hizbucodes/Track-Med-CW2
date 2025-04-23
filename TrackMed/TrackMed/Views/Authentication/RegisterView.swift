@@ -16,87 +16,192 @@ struct RegisterView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var passwordsMatch = true
+    @State private var isPasswordVisible = false
+    @State private var isConfirmPasswordVisible = false
+    
+    private var isFormValid: Bool {
+        return !username.isEmpty && !email.isEmpty && !password.isEmpty && !confirmPassword.isEmpty && !authViewModel.isLoading
+    }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Logo and app name
+        ScrollView {
+            VStack(spacing: 30) {
+                // Back button
+                HStack {
+                                    Button(action: {
+                                        presentationMode.wrappedValue.dismiss()
+                                    }) {
+                                        Image(systemName: "arrow.left")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .padding(12)
+                                            .background(Color.blue)
+                                            .cornerRadius(10)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.top, 10)
+                
+                // App logo and title
                 VStack(spacing: 10) {
-                    Image(systemName: "pills.circle.fill")
+                    Image(systemName: "mappin.and.ellipse")
                         .resizable()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(.blue)
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(.white)
+                        .padding(20)
+                        .background(Color.blue)
+                        .cornerRadius(12)
                     
-                    Text("Create Account")
+                    Text("NAVIGATION")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                        .font(.caption)
+                }
+                .padding(.top, 10)
+                
+                // Main headline
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Register now to")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                }
-                .padding(.bottom, 40)
-                
-                // Username field
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "person")
-                            .foregroundColor(.gray)
-                        TextField("Username", text: $username)
-                            .autocapitalization(.words)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                }
-                
-                // Email field
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "envelope")
-                            .foregroundColor(.gray)
-                        TextField("Email", text: $email)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                }
-                
-                // Password field
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "lock")
-                            .foregroundColor(.gray)
-                        SecureField("Password", text: $password)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                }
-                
-                // Confirm password field
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "lock")
-                            .foregroundColor(.gray)
-                        SecureField("Confirm password", text: $confirmPassword)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
                     
-                    if !passwordsMatch {
-                        Text("Passwords don't match")
+                    Text("access your account")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    
+                    Text("Effortlessly register, access your account, and enjoy seamless convenience!")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
+                
+                // Form fields
+                VStack(spacing: 24) {
+                    // Username field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter Username")
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                                .frame(width: 24)
+                            
+                            TextField("Enter your username", text: $username)
+                                .autocapitalization(.words)
+                        }
+                        .padding()
+                        .background(Color.clear)
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Email field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter Email")
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                                .foregroundColor(.gray)
+                                .frame(width: 24)
+                            
+                            TextField("Enter your email address", text: $email)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                        }
+                        .padding()
+                        .background(Color.clear)
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Password field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter Password")
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.gray)
+                                .frame(width: 24)
+                            
+                            if isPasswordVisible {
+                                TextField("Enter your password", text: $password)
+                            } else {
+                                SecureField("Enter your password", text: $password)
+                            }
+                            
+                            Button(action: {
+                                isPasswordVisible.toggle()
+                            }) {
+                                Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding()
+                        .background(Color.clear)
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Confirm password field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter Confirm Password")
+                            .fontWeight(.medium)
+                        
+                        HStack {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.gray)
+                                .frame(width: 24)
+                            
+                            if isConfirmPasswordVisible {
+                                TextField("Enter your confirm password", text: $confirmPassword)
+                            } else {
+                                SecureField("Enter your confirm password", text: $confirmPassword)
+                            }
+                            
+                            Button(action: {
+                                isConfirmPasswordVisible.toggle()
+                            }) {
+                                Image(systemName: isConfirmPasswordVisible ? "eye.slash" : "eye")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding()
+                        .background(Color.clear)
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                        
+                        if !passwordsMatch {
+                            Text("Passwords don't match")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+                    
+                    // Error message
+                    if let errorMessage = authViewModel.errorMessage {
+                        Text(errorMessage)
                             .font(.caption)
                             .foregroundColor(.red)
                     }
                 }
-                
-                // Error message
-                if let errorMessage = authViewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.top, 4)
-                }
+                .padding(.top, 10)
                 
                 // Sign up button
                 Button(action: {
@@ -118,11 +223,14 @@ struct RegisterView: View {
                     }
                 }
                 .padding()
-                .background(Color.blue)
-                .cornerRadius(8)
-                .disabled(username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || authViewModel.isLoading)
+                .background(
+                    isFormValid ? Color.blue : Color.blue.opacity(0.5)
+                )
+                .cornerRadius(30)
+                .disabled(!isFormValid)
+                .padding(.top, 15)
                 
-                // Sign in option
+                // Already have an account option
                 HStack {
                     Text("Already have an account?")
                         .font(.subheadline)
@@ -134,17 +242,11 @@ struct RegisterView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
                 }
-                .padding(.top, 16)
-                
-                Spacer()
+                .padding(.top, 12)
+                .padding(.bottom, 30)
             }
             .padding(.horizontal, 24)
-            .navigationBarItems(leading: Button(action: {
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Image(systemName: "xmark")
-                    .foregroundColor(.primary)
-            })
         }
+        .navigationBarHidden(true)
     }
 }

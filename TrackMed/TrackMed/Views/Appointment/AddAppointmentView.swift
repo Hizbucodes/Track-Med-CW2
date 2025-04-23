@@ -73,7 +73,7 @@ struct AddAppointmentView: View {
                         }
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 50)
                                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                         )
                     }
@@ -92,7 +92,7 @@ struct AddAppointmentView: View {
                         }
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 50)
                                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                         )
                     }
@@ -111,7 +111,7 @@ struct AddAppointmentView: View {
                         }
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 50)
                                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                         )
                     }
@@ -127,8 +127,9 @@ struct AddAppointmentView: View {
                                 Image(systemName: "person")
                                     .foregroundColor(.gray)
                                 
-                                Text("e.g. Me")
+                                Text(forWhom.isEmpty ? "e.g. Me" : forWhom)
                                     .foregroundColor(forWhom == "Me" ? .gray : .black)
+
                                 
                                 Spacer()
                                 
@@ -137,7 +138,7 @@ struct AddAppointmentView: View {
                             }
                             .padding()
                             .background(
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: 50)
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
                         }
@@ -163,9 +164,10 @@ struct AddAppointmentView: View {
                                     Image(systemName: "chevron.down")
                                         .foregroundColor(.gray)
                                 }
-                                .padding()
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 10)
+                                    RoundedRectangle(cornerRadius: 50)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                 )
                             }
@@ -186,9 +188,10 @@ struct AddAppointmentView: View {
                                     .labelsHidden()
                                     .frame(maxWidth: .infinity)
                             }
-                            .padding()
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 6)
                             .background(
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: 50)
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
                         }
@@ -205,7 +208,7 @@ struct AddAppointmentView: View {
                             .frame(height: 100)
                             .padding(4)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: 15)
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
                             .overlay(
@@ -261,8 +264,8 @@ struct AddAppointmentView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                            .background(doctorName.isEmpty || hospital.isEmpty || specialty.isEmpty || viewModel.isLoading ? Color.blue.opacity(0.5) : Color.blue)
+                            .cornerRadius(50)
                     }
                     .disabled(doctorName.isEmpty || hospital.isEmpty || specialty.isEmpty || viewModel.isLoading)
                     
@@ -276,10 +279,11 @@ struct AddAppointmentView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
+                            .cornerRadius(50)
                     }
                 }
                 .padding()
+                .padding(.bottom, 40)
             }
         }
         .background(Color.white)
