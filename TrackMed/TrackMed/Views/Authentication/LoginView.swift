@@ -16,6 +16,9 @@ struct LoginView: View {
     @State private var showBiometricError = false
     @State private var biometricErrorMessage: String?
     @State private var showForgotPassword = false
+    @State private var showPassword = false
+    @State private var showLoginAlert = false
+
 
     private var shouldAutoTriggerBiometrics: Bool {
         UserDefaults.standard.bool(forKey: "biometricEnabled") &&
@@ -68,7 +71,17 @@ struct LoginView: View {
                     HStack {
                         Image(systemName: "lock")
                             .foregroundColor(.black)
-                        SecureField("Password", text: $password)
+                        if showPassword {
+                            TextField("Password", text: $password)
+                        } else {
+                            SecureField("Password", text: $password)
+                        }
+                        Button(action: {
+                            showPassword.toggle()
+                        }) {
+                            Image(systemName: showPassword ? "eye" : "eye.slash")
+                                .foregroundColor(.gray)
+                        }
                     }
                     .padding()
                     .overlay(
@@ -108,14 +121,7 @@ struct LoginView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.bottom, 80)
-
-                // Error message
-                if let errorMessage = authViewModel.errorMessage, !showBiometricError {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.top, 4)
-                }
+               
 
                 // Sign in button
                 Button(action: {
@@ -188,6 +194,15 @@ struct LoginView: View {
                         }
                     }
                 }
+            }.alert("Login Error", isPresented: $showLoginAlert, actions: {
+                Button("OK", role: .cancel) {
+                    authViewModel.errorMessage = nil
+                }
+            }, message: {
+                Text(authViewModel.errorMessage ?? "Unknown error")
+            })
+            .onChange(of: authViewModel.errorMessage) { newValue in
+                showLoginAlert = newValue != nil
             }
         }
     }

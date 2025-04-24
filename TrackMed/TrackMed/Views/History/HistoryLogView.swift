@@ -14,7 +14,6 @@ struct HistoryLogView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @State private var selectedFilter: MedicationStatus?
-    @State private var showClearConfirmation = false
 
     // MARK: - Medication Filtering
 
@@ -153,30 +152,6 @@ struct HistoryLogView: View {
                     }
                     .listStyle(InsetGroupedListStyle())
                 }
-
-                // Clear All Data button
-                Button(action: {
-                    showClearConfirmation = true
-                }) {
-                    Text("Clear All Data")
-                        .foregroundColor(.red)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                }
-                .background(Color(.systemBackground))
-                .cornerRadius(0)
-                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: -1)
-            }
-           
-            .alert(isPresented: $showClearConfirmation) {
-                Alert(
-                    title: Text("Clear All Logs"),
-                    message: Text("Are you sure you want to delete all medication logs? This action cannot be undone."),
-                    primaryButton: .destructive(Text("Clear All")) {
-                        clearAllLogs()
-                    },
-                    secondaryButton: .cancel()
-                )
             }
             .onAppear {
                 if let userId = authViewModel.user?.id {
@@ -185,10 +160,6 @@ struct HistoryLogView: View {
                 }
             }
         }
-    }
-
-    private func clearAllLogs() {
-        // Implement the logic for clearing all logs if needed
     }
 }
 

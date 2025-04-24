@@ -33,41 +33,81 @@ class AuthViewModel: ObservableObject {
     func signIn(email: String, password: String) {
         isLoading = true
         errorMessage = nil
-        
+
         auth.signIn(withEmail: email, password: password) { [weak self] result, error in
             guard let self = self else { return }
-            
-            if let error = error {
-                self.errorMessage = error.localizedDescription
+
+            if let error = error as NSError? {
+                if let errorCode = AuthErrorCode(rawValue: error.code) {
+                    switch errorCode {
+                    case .wrongPassword, .invalidEmail, .userNotFound, .invalidCredential:
+                        self.errorMessage = "Incorrect email or password. Please try again."
+                    case .networkError:
+                        self.errorMessage = "Network error. Please check your connection."
+                    default:
+                        self.errorMessage = error.localizedDescription
+                    }
+                } else {
+                    self.errorMessage = error.localizedDescription
+                }
                 self.isLoading = false
                 return
             }
-            
+
             if let userId = result?.user.uid {
                 self.fetchUserData(userId: userId)
             }
         }
     }
+
     
     func signUp(name: String, email: String, password: String) {
+        // Client-side validation
+        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.errorMessage = "Please enter your name."
+            return
+        }
+        if !isValidEmail(email) {
+            self.errorMessage = "Please enter a valid email address."
+            return
+        }
+        if !isValidPassword(password) {
+            self.errorMessage = "Password must be at least 6 characters and contain at least one number."
+            return
+        }
+
         isLoading = true
         errorMessage = nil
-        
+
         auth.createUser(withEmail: email, password: password) { [weak self] result, error in
             guard let self = self else { return }
-            
-            if let error = error {
-                self.errorMessage = error.localizedDescription
+
+            if let error = error as NSError? {
+                if let errorCode = AuthErrorCode(rawValue: error.code) {
+                    switch errorCode {
+                    case .emailAlreadyInUse:
+                        self.errorMessage = "This email is already registered."
+                    case .invalidEmail:
+                        self.errorMessage = "Please enter a valid email address."
+                    case .weakPassword:
+                        self.errorMessage = "Password is too weak."
+                    default:
+                        self.errorMessage = error.localizedDescription
+                    }
+                } else {
+                    self.errorMessage = error.localizedDescription
+                }
                 self.isLoading = false
                 return
             }
-            
+
             if let userId = result?.user.uid {
                 let newUser = User(id: userId, email: email, name: name)
                 self.saveUserData(user: newUser)
             }
         }
     }
+
     
     func signOut() {
         do {
@@ -194,7 +234,7 @@ class AuthViewModel: ObservableObject {
           }
       }
     
-    // AuthViewModel.swift
+   
     func authenticateWithBiometrics(completion: @escaping (Bool) -> Void) {
         BiometricAuthService.authenticate { [weak self] success, error in
             DispatchQueue.main.async {

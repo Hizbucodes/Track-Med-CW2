@@ -115,7 +115,7 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     
-    // Add to MapViewModel.swift:
+   
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .denied, .restricted:
