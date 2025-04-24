@@ -13,6 +13,9 @@ import MapKit
 import MapKit
 
 struct Pharmacy: Identifiable, Equatable {
+    var uniqueID: String {
+            "\(name)-\(latitude)-\(longitude)"
+        }
     let id = UUID()
     let name: String
     let address: String

@@ -13,7 +13,8 @@ import Firebase
 struct TrackMedApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authViewModel = AuthViewModel()
-
+    @StateObject private var favorites = Favorites()
+    
     @State private var showSplash = true
     @State private var showOnboarding = true
 
@@ -26,6 +27,7 @@ struct TrackMedApp: App {
             } else if authViewModel.isAuthenticated {
                 MainTabView()
                     .environmentObject(authViewModel)
+                    .environmentObject(favorites)
             } else {
                 LoginView()
                     .environmentObject(authViewModel)
@@ -33,3 +35,4 @@ struct TrackMedApp: App {
         }
     }
 }
+

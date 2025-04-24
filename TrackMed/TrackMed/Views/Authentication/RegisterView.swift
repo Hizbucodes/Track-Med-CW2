@@ -242,7 +242,7 @@ struct RegisterView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
                 }
-                .padding(.top, 12)
+                
                 .padding(.bottom, 30)
             }
             .padding(.horizontal, 24)

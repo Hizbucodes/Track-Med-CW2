@@ -22,13 +22,13 @@ struct CalendarView: View {
     }
 
     var selectedDateAppointments: [Appointment] {
-        appointmentViewModel.appointments(for: selectedDate) // Use the function from AppointmentViewModel
+        appointmentViewModel.appointments(for: selectedDate)
             .sorted { $0.time < $1.time }
     }
 
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy" // Added year for clarity
+        formatter.dateFormat = "MMMM d, yyyy"
         return formatter
     }
 
@@ -49,7 +49,7 @@ struct CalendarView: View {
             }
             .padding(.trailing, 10)
             
-            Text("Refill Tracker")
+            Text("Calendar")
                 .font(.title2)
                 .fontWeight(.bold)
             
@@ -130,12 +130,10 @@ struct CalendarView: View {
                 }
             }
             .onAppear {
-                if let userId = authViewModel.user?.id { // Assuming AuthViewModel is available if needed
-                    appointmentViewModel.fetchAppointments(for: userId) // Ensure appointments are fetched
+                if let userId = authViewModel.user?.id {
+                    appointmentViewModel.fetchAppointments(for: userId)
                 }
             }
         }
     }
 }
-
-// Ensure AppointmentScheduleRow and MedicationLogRow are defined elsewhere

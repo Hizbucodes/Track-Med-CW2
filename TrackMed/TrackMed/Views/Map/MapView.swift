@@ -10,29 +10,19 @@ import MapKit
 
 struct MapView: View {
     @EnvironmentObject var mapViewModel: MapViewModel
-    @State private var selectedFilter: LocationType = .pharmacy
+    @EnvironmentObject var favorites: Favorites
+    @State private var showingFavorites = false
+    @State private var isShowingFilterOptions = false // To control the presentation of filter options
     @State private var searchText: String = ""
     @FocusState private var isSearchFocused: Bool
 
-    
     var body: some View {
         ZStack {
             // MARK: - Map Layer
             Map(coordinateRegion: $mapViewModel.region, showsUserLocation: true, annotationItems: mapViewModel.pharmacies) { pharmacy in
                 MapAnnotation(coordinate: pharmacy.coordinate) {
-                    Button(action: {
-                        mapViewModel.selectedLocation = pharmacy
-                    }) {
-                        Image(systemName: mapViewModel.showType == .pharmacy ? "pills.circle.fill" : "heart.circle.fill")
-                            .font(.title)
-                            .foregroundColor(mapViewModel.showType == .pharmacy ? .blue : .pink)
-                            .background(Color.white.clipShape(Circle()))
+                    Button(action: { mapViewModel.selectedLocation = pharmacy }) { Image(systemName: mapViewModel.showType == .pharmacy ? "pills.circle.fill" : "heart.circle.fill") .font(.title) .foregroundColor(mapViewModel.showType == .pharmacy ? .blue : .pink) .background(Color.white.clipShape(Circle())) } } } .ignoresSafeArea()
 
-                    }
-                }
-            }
-            .ignoresSafeArea()
-            
             // MARK: - UI Overlay
             VStack(spacing: 16) {
                 HStack(spacing: 12) {
@@ -58,12 +48,13 @@ struct MapView: View {
                     }
                     .padding(.vertical, 10)
                     .padding(.horizontal, 16)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    .background(Color.white)
+
+                    .cornerRadius(50)
 
                     // Filter button
                     Button(action: {
-                        // Optional: open filter view or sheet
+                        isShowingFilterOptions = true // Show filter options when tapped
                     }) {
                         Image(systemName: "slider.horizontal.3")
                             .foregroundColor(.white)
@@ -71,83 +62,101 @@ struct MapView: View {
                             .background(Color.blue)
                             .clipShape(Circle())
                     }
-                }
-                .padding(.horizontal)
-
-                
-                Picker("Filter", selection: $selectedFilter) {
-                    Text("Pharmacy").tag(LocationType.pharmacy)
-                    Text("Wellness").tag(LocationType.wellness)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .onChange(of: selectedFilter) { newValue in
-                    mapViewModel.showType = newValue
-                    if newValue == .pharmacy {
-                        mapViewModel.fetchNearbyPharmacies()
-                    } else {
-                        mapViewModel.fetchNearbyWellnessCenters()
+                    .sheet(isPresented: $isShowingFilterOptions) { // Present filter options in a sheet
+                        FilterOptionsView(selectedType: $mapViewModel.showType) { newType in
+                            mapViewModel.showType = newType
+                            if newType == .pharmacy {
+                                mapViewModel.fetchNearbyPharmacies()
+                            } else {
+                                mapViewModel.fetchNearbyWellnessCenters()
+                            }
+                        }
+                        .presentationDetents([.medium]) // Adjust the size of the sheet as needed
                     }
                 }
-                
+                .padding(.horizontal)
+                Button(action: { showingFavorites = true }) {
+                                    Image(systemName: "heart.fill")
+                                        .font(.title)
+                                        .foregroundColor(.red)
+                                        .padding(10)
+                                        .background(Color.white)
+                                        .clipShape(Circle())
+                                        .shadow(radius: 3)
+                                }
+                                .padding(.trailing, 16)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+
                 Spacer()
                 
+                
+
                 // MARK: - Bottom Detail Card
                 if let selectedLocation = mapViewModel.selectedLocation {
                     LocationDetailCard(
-                        location: selectedLocation,
-                        getDirections: {
-                            mapViewModel.getDirections(to: selectedLocation)
-                        },
-                        closeAction: {
-                            mapViewModel.selectedLocation = nil
-                        }
-                    )
+                                        location: selectedLocation,
+                                        isFavorite: favorites.contains(selectedLocation),
+                                        toggleFavorite: { favorites.toggle(selectedLocation) },
+                                        getDirections: {
+                                            mapViewModel.getDirections(to: selectedLocation)
+                                        },
+                                        closeAction: {
+                                            mapViewModel.selectedLocation = nil
+                                        }
+                                    )
                     .transition(.move(edge: .bottom))
                     .animation(.spring(), value: mapViewModel.selectedLocation)
                     .padding(.bottom, 60)
                 }
-                
             }
             .onAppear {
                 if mapViewModel.searchText.isEmpty {
-                    if selectedFilter == .pharmacy {
+                    if mapViewModel.showType == .pharmacy {
                         mapViewModel.fetchNearbyPharmacies()
                     } else {
                         mapViewModel.fetchNearbyWellnessCenters()
                     }
                 }
             }
-
+        }.sheet(isPresented: $showingFavorites) {
+            FavoritesView()
+                .environmentObject(mapViewModel)
+                .environmentObject(favorites)
         }
     }
-    
+
     struct LocationDetailCard: View {
         let location: Pharmacy
+        let isFavorite: Bool
+            let toggleFavorite: () -> Void
         let getDirections: () -> Void
         let closeAction: () -> Void
-        
+
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(location.name)
                             .font(.headline)
-                        
+
                         Text(location.address)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Spacer()
-                    
+
                     Button(action: closeAction) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
                             .foregroundColor(.gray)
                     }
+                    Button(action: toggleFavorite) {
+                                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                                            .foregroundColor(isFavorite ? .red : .gray)
+                                    }
                 }
-                
+
                 if let phone = location.phoneNumber {
                     Button(action: {
                         let tel = "tel://" + phone.replacingOccurrences(of: "-", with: "")
@@ -163,7 +172,7 @@ struct MapView: View {
                         }
                     }
                 }
-                
+
                 HStack {
                     Spacer()
                     Button(action: getDirections) {
@@ -188,4 +197,4 @@ struct MapView: View {
             .padding()
         }
     }
-    }
+}

@@ -13,14 +13,8 @@ struct ProfileView: View {
     @State private var showEditName = false
     @State private var showEditEmail = false
     @State private var showEditPassword = false
-    @State private var showLanguagePicker = false
     @State private var showLogoutConfirmation = false
     
-    let languages = [
-        ("English", "en"),
-        ("Tamil", "ta"),
-        ("Sinhala", "si")
-    ]
     
     var body: some View {
         NavigationView {
@@ -28,10 +22,9 @@ struct ProfileView: View {
             List {
                 // Profile header
                 VStack {
-                    Image(systemName: "person.circle.fill")
+                    Image("user-image")
                         .resizable()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(.blue)
                         .padding(.top, 20)
                     
                     Text(authViewModel.user?.name ?? "User")
@@ -44,6 +37,7 @@ struct ProfileView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
+                
                 
                 Section(header: Text("Account Settings")) {
                     Button(action: { showEditName = true }) {
@@ -70,17 +64,6 @@ struct ProfileView: View {
                 }
                 
                 Section(header: Text("App Settings")) {
-                    Button(action: { showLanguagePicker = true }) {
-                        HStack {
-                            Label("Language", systemImage: "globe")
-                            Spacer()
-                            Text(getCurrentLanguageName())
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
                     Toggle(isOn: Binding(
                         get: { authViewModel.user?.useBiometricAuth ?? false },
                         set: {
@@ -128,13 +111,6 @@ struct ProfileView: View {
                 ChangePasswordView()
                     .environmentObject(authViewModel)
             }
-            .sheet(isPresented: $showLanguagePicker) {
-                LanguagePickerView(
-                    languages: languages,
-                    currentLanguage: authViewModel.user?.language ?? "en",
-                    onSelect: { authViewModel.updateProfile(language: $0) }
-                )
-            }
             .alert(isPresented: $showLogoutConfirmation) {
                 Alert(
                     title: Text("Log Out"),
@@ -148,10 +124,7 @@ struct ProfileView: View {
         }
     }
     
-    private func getCurrentLanguageName() -> String {
-        let code = authViewModel.user?.language ?? "en"
-        return languages.first { $0.1 == code }?.0 ?? "English"
-    }
+    
 }
 
 struct EditProfileView: View {
@@ -277,40 +250,6 @@ struct ChangePasswordView: View {
             errorMessage = "Password should be at least 6 characters"
         default:
             errorMessage = error.localizedDescription
-        }
-    }
-}
-
-struct LanguagePickerView: View {
-    let languages: [(String, String)]
-    let currentLanguage: String
-    let onSelect: (String) -> Void
-    @Environment(\.presentationMode) var presentationMode
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(languages, id: \.1) { language in
-                    Button(action: {
-                        onSelect(language.1)
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        HStack {
-                            Text(language.0)
-                            Spacer()
-                            if language.1 == currentLanguage {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .foregroundColor(.primary)
-                }
-            }
-            .navigationTitle("Language")
-            .navigationBarItems(trailing: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            })
         }
     }
 }
