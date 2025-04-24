@@ -28,6 +28,20 @@ struct HomeView: View {
     var todaysAppointments: [Appointment] {
         appointmentViewModel.appointments.filter { Calendar.current.isDateInToday($0.date) }
     }
+    
+    var notificationCount: Int {
+        // Medication reminders for today that are upcoming
+        let todayLogs = medicationViewModel.medicationLogs.filter { Calendar.current.isDateInToday($0.timeScheduled) && $0.timeScheduled > Date() }
+        // Today's appointments
+        let todayAppointments = appointmentViewModel.appointments.filter { Calendar.current.isDateInToday($0.date) }
+        // Low supply medications
+        let lowSupplyMeds = medicationViewModel.medications.filter { med in
+            guard let current = med.currentSupply, let total = med.totalSupply else { return false }
+            return Double(current) / Double(total) <= 0.2
+        }
+        return todayLogs.count + todayAppointments.count + lowSupplyMeds.count
+    }
+
 
     var body: some View {
         NavigationView {
@@ -74,12 +88,16 @@ struct HomeView: View {
                                     .padding(10)
                                     .background(Color(.systemGray6))
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 10, height: 10)
+                                // Show the red badge only if there are notifications
+                                if notificationCount > 0 {
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 10, height: 10)
+                                }
                             }
                         }
                         .padding(12)
+
                     }
 
                     // Quick Actions

@@ -92,6 +92,7 @@ struct AddMedicationView: View {
                         Text("Dosage")
                             .font(.subheadline)
                             .foregroundColor(.black)
+                            .padding(.top, 16)
                         
                         HStack {
                             Image(systemName: "scalemass.fill")
@@ -108,6 +109,7 @@ struct AddMedicationView: View {
 
                     }
                     .padding(.horizontal)
+                    .padding(.vertical)
                     
                     // Frequency
                     VStack(alignment: .leading, spacing: 10) {

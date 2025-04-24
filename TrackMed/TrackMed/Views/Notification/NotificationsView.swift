@@ -44,9 +44,19 @@ struct NotificationsView: View {
                 }
             }
             .navigationTitle("Notifications")
-            .navigationBarItems(trailing: Button("Close") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .navigationBarItems(trailing:
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    Image(systemName: "xmark")
+                        .imageScale(.large)
+                        .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.black)
+                        .clipShape(Circle())
+                }
+            )
+
             .onAppear {
                 generateSampleNotifications()
             }
