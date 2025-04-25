@@ -64,12 +64,14 @@ struct AddAppointmentView: View {
                         Text("Doctor name")
                             .font(.subheadline)
                             .foregroundColor(.black)
+                            .accessibilityHidden(true)
                         
                         HStack {
                             Image(systemName: "person.circle")
                                 .foregroundColor(.gray)
                             
-                            TextField("e.g. Dr. Gunathilaka", text: $doctorName)
+                            TextField("e.g. Dr. Gunathilaka", text: $doctorName).accessibilityLabel("Doctor name")
+                                .accessibilityHint("Enter the doctor's name")
                         }
                         .padding()
                         .background(
@@ -83,12 +85,13 @@ struct AddAppointmentView: View {
                         Text("Consultant Hospital or channeling center")
                             .font(.subheadline)
                             .foregroundColor(.black)
-                        
+                            .accessibilityHidden(true)
                         HStack {
                             Image(systemName: "building.2")
                                 .foregroundColor(.gray)
                             
-                            TextField("e.g. Asiri or channeling center kandy", text: $hospital)
+                            TextField("e.g. Asiri or channeling center kandy", text: $hospital).accessibilityLabel("Hospital or channeling center")
+                                .accessibilityHint("Enter the hospital or channeling center")
                         }
                         .padding()
                         .background(
@@ -102,12 +105,14 @@ struct AddAppointmentView: View {
                         Text("Specialty")
                             .font(.subheadline)
                             .foregroundColor(.black)
+                            .accessibilityHidden(true)
                         
                         HStack {
                             Image(systemName: "stethoscope")
                                 .foregroundColor(.gray)
                             
-                            TextField("e.g. Dermatologist", text: $specialty)
+                            TextField("e.g. Dermatologist", text: $specialty).accessibilityLabel("Specialty")
+                                .accessibilityHint("Enter the doctor's specialty")
                         }
                         .padding()
                         .background(
@@ -121,7 +126,7 @@ struct AddAppointmentView: View {
                         Text("Who's Appointment")
                             .font(.subheadline)
                             .foregroundColor(.black)
-                        
+                            .accessibilityHidden(true)
                         Button(action: { showWhoOptions.toggle() }) {
                             HStack {
                                 Image(systemName: "person")
@@ -141,7 +146,9 @@ struct AddAppointmentView: View {
                                 RoundedRectangle(cornerRadius: 50)
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
-                        }
+                        }.accessibilityLabel("Appointment for")
+                            .accessibilityValue(forWhom)
+                            .accessibilityHint("Double tap to select who the appointment is for")
                     }
                     
                     
@@ -150,12 +157,12 @@ struct AddAppointmentView: View {
                             Text("Appointment Date")
                                 .font(.subheadline)
                                 .foregroundColor(.black)
-                            
+                                .accessibilityHidden(true)
                             Button(action: { showDatePicker.toggle() }) {
                                 HStack {
                                     Image(systemName: "calendar")
                                         .foregroundColor(.gray)
-                                    
+                                        .accessibilityHidden(true)
                                     Text(dateFormatter.string(from: date))
                                         .foregroundColor(.black)
                                     
@@ -163,6 +170,7 @@ struct AddAppointmentView: View {
                                     
                                     Image(systemName: "chevron.down")
                                         .foregroundColor(.gray)
+                                        .accessibilityHidden(true)
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 6)
@@ -170,7 +178,9 @@ struct AddAppointmentView: View {
                                     RoundedRectangle(cornerRadius: 50)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                 )
-                            }
+                            }.accessibilityLabel("Appointment date")
+                                .accessibilityValue(dateFormatter.string(from: date))
+                                .accessibilityHint("Double tap to select appointment date")
                         }
                         .frame(maxWidth: .infinity)
                         
@@ -178,15 +188,18 @@ struct AddAppointmentView: View {
                             Text("Appointment Time")
                                 .font(.subheadline)
                                 .foregroundColor(.black)
-                            
+                                .accessibilityHidden(true)
                             HStack {
                                 Image(systemName: "clock")
                                     .foregroundColor(.gray)
-                                
+                                    .accessibilityHidden(true)
                         
                                 DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
                                     .labelsHidden()
                                     .frame(maxWidth: .infinity)
+                                    .accessibilityLabel("Appointment time")
+                                                                        .accessibilityValue(
+                                                                            DateFormatter.localizedString(from: time, dateStyle: .none, timeStyle: .short))
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 6)
@@ -203,14 +216,15 @@ struct AddAppointmentView: View {
                         Text("Appointment Note")
                             .font(.subheadline)
                             .foregroundColor(.black)
-                        
+                            .accessibilityHidden(true)
                         TextEditor(text: $notes)
                             .frame(height: 100)
                             .padding(4)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 15)
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
+                            ).accessibilityLabel("Appointment notes")
+                            .accessibilityHint("Add notes or special instructions")
                             .overlay(
                                 Group {
                                     if notes.isEmpty {
@@ -235,21 +249,25 @@ struct AddAppointmentView: View {
                             Image(systemName: "bell.fill")
                                 .foregroundColor(.white)
                                 .font(.system(size: 16))
+                                .accessibilityHidden(true)
                         }
                         
                         VStack(alignment: .leading) {
                             Text("Reminders")
                                 .font(.headline)
-                            
+                                .accessibilityHidden(true)
                             Text("Get notified when it's time for appointment schedule")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.gray).accessibilityHidden(true)
                         }
                         
                         Spacer()
                         
                         Toggle("", isOn: $remindersEnabled)
                             .labelsHidden()
+                            .accessibilityLabel("Reminders")
+                            .accessibilityValue(remindersEnabled ? "On" : "Off")
+                            .accessibilityHint("Double tap to toggle appointment reminders")
                     }
                     .padding()
                     .background(Color(red: 0.95, green: 0.97, blue: 1.0))
@@ -268,7 +286,8 @@ struct AddAppointmentView: View {
                             .cornerRadius(50)
                     }
                     .disabled(doctorName.isEmpty || hospital.isEmpty || specialty.isEmpty || viewModel.isLoading)
-                    
+                    .accessibilityLabel("Add appointment")
+                                        .accessibilityHint("Double tap to save this appointment")
                     
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
@@ -280,7 +299,8 @@ struct AddAppointmentView: View {
                             .padding()
                             .background(Color.gray.opacity(0.2))
                             .cornerRadius(50)
-                    }
+                    }.accessibilityLabel("Cancel")
+                        .accessibilityHint("Double tap to cancel and go back")
                 }
                 .padding()
                 .padding(.bottom, 40)
@@ -341,7 +361,7 @@ struct DatePickerSheet: View {
                 DatePicker("Select Date", selection: $selectedDate, displayedComponents: .date)
                     .datePickerStyle(GraphicalDatePickerStyle())
                     .padding()
-                
+                    .accessibilityLabel("Select appointment date")
                 Button("Done") {
                     isPresented = false
                 }
@@ -351,7 +371,8 @@ struct DatePickerSheet: View {
                 .foregroundColor(.white)
                 .cornerRadius(10)
                 .padding()
-                
+                .accessibilityLabel("Done")
+                                .accessibilityHint("Double tap to confirm date selection")
                 Spacer()
             }
             .navigationTitle("Select Date")
@@ -384,16 +405,19 @@ struct WhoOptionsSheet: View {
                             if selectedOption == option {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
+                                    .accessibilityLabel("\(option) selected")
                             }
                         }
-                    }
+                    }.accessibilityLabel(option)
+                        .accessibilityHint(selectedOption == option ? "Currently selected" : "Double tap to select \(option)")
                 }
             }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Who's Appointment")
             .navigationBarItems(trailing: Button("Close") {
                 isPresented = false
-            })
+            }.accessibilityLabel("Close")
+                .accessibilityHint("Double tap to close"))
         }
     }
 }

@@ -15,7 +15,6 @@ struct RefillTrackerView: View {
         medicationViewModel.medications.filter { $0.refillTracking && $0.currentSupply != nil && $0.totalSupply != nil }
     }
 
-    
     var body: some View {
         HStack {
             Button(action: {
@@ -25,17 +24,19 @@ struct RefillTrackerView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.blue)
                         .frame(width: 36, height: 36)
-                    
                     Image(systemName: "arrow.left")
                         .foregroundColor(.white)
                         .font(.system(size: 18))
                 }
             }
             .padding(.trailing, 10)
+            .accessibilityLabel("Back")
+            .accessibilityHint("Go back to previous screen")
             
             Text("Refill Tracker")
                 .font(.title2)
                 .fontWeight(.bold)
+                .accessibilityAddTraits(.isHeader)
             
             Spacer()
         }
@@ -47,21 +48,24 @@ struct RefillTrackerView: View {
                     if medicationViewModel.isLoading {
                         ProgressView()
                             .padding(.top, 40)
+                            .accessibilityLabel("Loading medications")
+                            .accessibilityHint("Please wait while your medications are loading")
                     } else if refillableMedications.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "pills")
                                 .font(.system(size: 48))
                                 .foregroundColor(.blue.opacity(0.7))
                                 .padding(.top, 40)
-                            
+                                .accessibilityHidden(true)
                             Text("No medications with refill tracking")
                                 .font(.headline)
-                            
+                                .accessibilityLabel("No medications with refill tracking")
                             Text("Add a medication with refill tracking enabled to see it here.")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
+                                .accessibilityHint("Add a medication with refill tracking enabled to see it here.")
                         }
                     } else {
                         ForEach(refillableMedications) { medication in
@@ -73,7 +77,6 @@ struct RefillTrackerView: View {
                 }
                 .padding()
             }
-          
         }
     }
     
@@ -87,7 +90,6 @@ struct RefillCard: View {
     let medication: Medication
     let onRefill: (Int) -> Void
     
-    // Add this computed property
     var isFull: Bool {
         guard let current = medication.currentSupply,
               let total = medication.totalSupply else { return false }
@@ -122,14 +124,13 @@ struct RefillCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(medication.name)
                         .font(.headline)
-                    
+                        .accessibilityLabel("Medication name: \(medication.name)")
                     Text(medication.dosage)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("Dosage: \(medication.dosage)")
                 }
-                
                 Spacer()
-                
                 Text(statusText)
                     .font(.subheadline)
                     .foregroundColor(statusColor)
@@ -137,6 +138,7 @@ struct RefillCard: View {
                     .padding(.vertical, 6)
                     .background(statusColor.opacity(0.1))
                     .cornerRadius(20)
+                    .accessibilityLabel("Status: \(statusText)")
             }
             
             if let current = medication.currentSupply, let total = medication.totalSupply {
@@ -145,20 +147,20 @@ struct RefillCard: View {
                         Text("Current Supply")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                        
+                            .accessibilityHidden(true)
                         Spacer()
-                        
                         Text("\(current) of \(total) pills")
                             .font(.subheadline)
+                            .accessibilityLabel("Current supply: \(current) out of \(total) pills")
                     }
-                    
                     ProgressBar(value: medication.progress, color: statusColor)
+                        .accessibilityLabel("Supply progress")
+                        .accessibilityValue("\(Int(medication.progress * 100)) percent")
                 }
             }
             
             HStack {
                 Spacer()
-                
                 Button(action: {
                     if let total = medication.totalSupply {
                         onRefill(total)
@@ -169,20 +171,24 @@ struct RefillCard: View {
                         .foregroundColor(isFull ? .black : .white)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 16)
-                            .padding(.vertical, 6)
+                        .padding(.vertical, 6)
                         .background(isFull ? Color.gray.opacity(0.2) : Color.blue)
                         .cornerRadius(50)
                 }
-                .disabled(isFull) // Disable when full
+                .disabled(isFull)
+                .accessibilityLabel("Refill medication")
+                .accessibilityHint(isFull ? "Medication is already full" : "Double tap to refill medication to full supply")
             }
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(medication.name), \(medication.dosage), Status: \(statusText), Current supply: \(medication.currentSupply ?? 0) out of \(medication.totalSupply ?? 0) pills")
+        .accessibilityHint(isFull ? "Medication is already full" : "Double tap refill to mark medication as refilled")
     }
 }
-
 
 struct ProgressBar: View {
     var value: Double
@@ -196,11 +202,12 @@ struct ProgressBar: View {
                     .opacity(0.1)
                     .foregroundColor(Color(.systemGray4))
                     .cornerRadius(5)
-                
+                    .accessibilityHidden(true)
                 Rectangle()
                     .frame(width: min(CGFloat(self.value) * geometry.size.width, geometry.size.width), height: 10)
                     .foregroundColor(color)
                     .cornerRadius(5)
+                    .accessibilityHidden(true)
             }
         }
         .frame(height: 10)

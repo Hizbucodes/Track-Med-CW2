@@ -14,92 +14,112 @@ struct ProfileView: View {
     @State private var showEditEmail = false
     @State private var showEditPassword = false
     @State private var showLogoutConfirmation = false
-    
-    
+
     var body: some View {
         NavigationView {
-            VStack{
-            List {
-                // Profile header
-                VStack {
-                    Image("user-image")
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                        .padding(.top, 20)
-                    
-                    Text(authViewModel.user?.name ?? "User")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    
-                    Text(authViewModel.user?.email ?? "Email")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                
-                
-                Section(header: Text("Account Settings")) {
-                    Button(action: { showEditName = true }) {
-                        HStack {
-                            Label("Name", systemImage: "person.fill")
-                            Spacer()
-                            Text(authViewModel.user?.name ?? "")
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
+            VStack {
+                List {
+                    // Profile header
+                    VStack {
+                        Image("user-image")
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                            .padding(.top, 20)
+                            .accessibilityLabel("User profile image")
+                            .accessibilityHint("Profile picture of the user")
+
+                        Text(authViewModel.user?.name ?? "User")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .accessibilityLabel("Name: \(authViewModel.user?.name ?? "User")")
+
+                        Text(authViewModel.user?.email ?? "Email")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel("Email: \(authViewModel.user?.email ?? "Email")")
                     }
-                    
-                    Button(action: { showEditPassword = true }) {
-                        HStack {
-                            Label("Password", systemImage: "lock.fill")
-                            Spacer()
-                            Text("Change")
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                
-                Section(header: Text("App Settings")) {
-                    Toggle(isOn: Binding(
-                        get: { authViewModel.user?.useBiometricAuth ?? false },
-                        set: {
-                            authViewModel.updateProfile(useBiometricAuth: $0)
-                            UserDefaults.standard.set($0, forKey: "biometricEnabled")
-                            if $0 {
-                                UserDefaults.standard.set(authViewModel.user?.email, forKey: "biometricEmail")
-                                print("Face ID enabled: \(UserDefaults.standard.bool(forKey: "biometricEnabled"))")
-                                
-                            } else {
-                                UserDefaults.standard.removeObject(forKey: "biometricEmail")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Profile. Name: \(authViewModel.user?.name ?? "User"). Email: \(authViewModel.user?.email ?? "Email")")
+
+                    Section(header: Text("Account Settings")
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityLabel("Account Settings")) {
+                        Button(action: { showEditName = true }) {
+                            HStack {
+                                Label("Name", systemImage: "person.fill")
+                                    .accessibilityHidden(true)
+                                Spacer()
+                                Text(authViewModel.user?.name ?? "")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
                             }
                         }
-                    )) {
-                        Label("Face ID", systemImage: "faceid")
-                    }
-                    
-                }
-                
-                Section {
-                    Button(action: {
-                        showLogoutConfirmation = true
-                    }) {
-                        HStack {
-                            Spacer()
-                            Text("Log Out")
-                                .foregroundColor(.red)
-                            Spacer()
+                        .accessibilityLabel("Edit name")
+                        .accessibilityHint("Double tap to edit your name")
+
+                        Button(action: { showEditPassword = true }) {
+                            HStack {
+                                Label("Password", systemImage: "lock.fill")
+                                    .accessibilityHidden(true)
+                                Spacer()
+                                Text("Change")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
+                            }
                         }
+                        .accessibilityLabel("Change password")
+                        .accessibilityHint("Double tap to change your password")
+                    }
+
+                    Section(header: Text("App Settings")
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityLabel("App Settings")) {
+                        Toggle(isOn: Binding(
+                            get: { authViewModel.user?.useBiometricAuth ?? false },
+                            set: {
+                                authViewModel.updateProfile(useBiometricAuth: $0)
+                                UserDefaults.standard.set($0, forKey: "biometricEnabled")
+                                if $0 {
+                                    UserDefaults.standard.set(authViewModel.user?.email, forKey: "biometricEmail")
+                                } else {
+                                    UserDefaults.standard.removeObject(forKey: "biometricEmail")
+                                }
+                            }
+                        )) {
+                            Label("Face ID", systemImage: "faceid")
+                                .accessibilityHidden(true)
+                        }
+                        .accessibilityLabel("Face ID authentication")
+                        .accessibilityValue(authViewModel.user?.useBiometricAuth == true ? "Enabled" : "Disabled")
+                        .accessibilityHint("Double tap to \(authViewModel.user?.useBiometricAuth == true ? "disable" : "enable") Face ID authentication")
+                    }
+
+                    Section {
+                        Button(action: {
+                            showLogoutConfirmation = true
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text("Log Out")
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                        }
+                        .accessibilityLabel("Log out")
+                        .accessibilityHint("Double tap to log out of your account")
                     }
                 }
+                .listStyle(InsetGroupedListStyle())
             }
-            .listStyle(InsetGroupedListStyle())
-        }
-        .padding(.bottom, 40)
+            .padding(.bottom, 40)
             .navigationTitle("Profile")
+            .accessibilityAddTraits(.isHeader)
             .sheet(isPresented: $showEditName) {
                 EditProfileView(
                     title: "Edit Name",
@@ -123,8 +143,6 @@ struct ProfileView: View {
             }
         }
     }
-    
-    
 }
 
 struct EditProfileView: View {
@@ -133,14 +151,14 @@ struct EditProfileView: View {
     let keyboardType: UIKeyboardType
     let onSave: (String) -> Void
     @Environment(\.presentationMode) var presentationMode
-    
+
     init(title: String, value: String, keyboardType: UIKeyboardType = .default, onSave: @escaping (String) -> Void) {
         self.title = title
         self._value = State(initialValue: value)
         self.keyboardType = keyboardType
         self.onSave = onSave
     }
-    
+
     var body: some View {
         NavigationView {
             VStack {
@@ -150,18 +168,25 @@ struct EditProfileView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding()
-                
+                    .accessibilityLabel(title)
+                    .accessibilityHint("Enter your new \(title.lowercased())")
+
                 Spacer()
             }
             .navigationTitle(title)
+            .accessibilityAddTraits(.isHeader)
             .navigationBarItems(
                 leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
-                },
+                }
+                .accessibilityLabel("Cancel")
+                .accessibilityHint("Double tap to cancel and go back"),
                 trailing: Button("Save") {
                     onSave(value)
                     presentationMode.wrappedValue.dismiss()
                 }
+                .accessibilityLabel("Save")
+                .accessibilityHint("Double tap to save changes")
             )
         }
     }
@@ -175,26 +200,37 @@ struct ChangePasswordView: View {
     @State private var isLoading = false
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authViewModel: AuthViewModel
-    
+
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Current Password")) {
+                Section(header: Text("Current Password")
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel("Current Password")) {
                     SecureField("Enter current password", text: $currentPassword)
+                        .accessibilityLabel("Current password")
+                        .accessibilityHint("Enter your current password")
                 }
-                
-                Section(header: Text("New Password")) {
+
+                Section(header: Text("New Password")
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel("New Password")) {
                     SecureField("Enter new password (min 6 characters)", text: $newPassword)
+                        .accessibilityLabel("New password")
+                        .accessibilityHint("Enter your new password. Minimum 6 characters.")
                     SecureField("Confirm new password", text: $confirmPassword)
+                        .accessibilityLabel("Confirm new password")
+                        .accessibilityHint("Re-enter your new password")
                 }
-                
+
                 if let errorMessage = errorMessage {
                     Section {
                         Text(errorMessage)
                             .foregroundColor(.red)
+                            .accessibilityLabel("Error: \(errorMessage)")
                     }
                 }
-                
+
                 Section {
                     Button(action: updatePassword) {
                         HStack {
@@ -206,28 +242,33 @@ struct ChangePasswordView: View {
                         }
                     }
                     .disabled(!formIsValid)
+                    .accessibilityLabel("Update password")
+                    .accessibilityHint("Double tap to update your password")
                 }
             }
             .navigationTitle("Change Password")
+            .accessibilityAddTraits(.isHeader)
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
-            })
+            }
+            .accessibilityLabel("Cancel")
+            .accessibilityHint("Double tap to cancel and go back"))
         }
     }
-    
+
     private var formIsValid: Bool {
         !currentPassword.isEmpty &&
         newPassword.count >= 6 &&
         newPassword == confirmPassword &&
         !isLoading
     }
-    
+
     private func updatePassword() {
         guard formIsValid else { return }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         authViewModel.updatePassword(
             currentPassword: currentPassword,
             newPassword: newPassword
@@ -241,7 +282,7 @@ struct ChangePasswordView: View {
             }
         }
     }
-    
+
     private func handleError(_ error: Error) {
         switch error {
         case AuthErrorCode.wrongPassword:

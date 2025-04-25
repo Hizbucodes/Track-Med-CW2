@@ -18,7 +18,6 @@ struct RegisterView: View {
     @State private var isPasswordVisible = false
     @State private var isConfirmPasswordVisible = false
 
-    // Per-field error messages
     @State private var usernameError: String?
     @State private var emailError: String?
     @State private var passwordError: String?
@@ -35,7 +34,6 @@ struct RegisterView: View {
     }
 
     private func isValidPassword(_ password: String) -> Bool {
-        // At least 6 characters, at least one number
         let passwordRegEx = "^(?=.*[0-9]).{6,}$"
         let passwordPred = NSPredicate(format: "SELF MATCHES %@", passwordRegEx)
         return passwordPred.evaluate(with: password)
@@ -56,6 +54,8 @@ struct RegisterView: View {
                             .background(Color.blue)
                             .cornerRadius(10)
                     }
+                    .accessibilityLabel("Back")
+                    .accessibilityHint("Go back to previous screen")
                     Spacer()
                 }
                 .padding(.top, 10)
@@ -69,10 +69,13 @@ struct RegisterView: View {
                         .padding(20)
                         .background(Color.blue)
                         .cornerRadius(12)
+                        .accessibilityLabel("TrackMed App Logo")
+                        .accessibilityHint("Welcome to TrackMed")
                     Text("NAVIGATION")
                         .fontWeight(.semibold)
                         .foregroundColor(.blue)
                         .font(.caption)
+                        .accessibilityHidden(true)
                 }
                 .padding(.top, 10)
 
@@ -91,6 +94,8 @@ struct RegisterView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 10)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Register now to access your account. Effortlessly register, access your account, and enjoy seamless convenience.")
 
                 // Form fields
                 VStack(spacing: 24) {
@@ -98,12 +103,16 @@ struct RegisterView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Enter Username")
                             .fontWeight(.medium)
+                            .accessibilityHidden(true)
                         HStack {
                             Image(systemName: "person.fill")
                                 .foregroundColor(.gray)
                                 .frame(width: 24)
+                                .accessibilityHidden(true)
                             TextField("Enter your username", text: $username)
                                 .autocapitalization(.words)
+                                .accessibilityLabel("Username")
+                                .accessibilityHint("Enter your username")
                         }
                         .padding()
                         .background(Color.clear)
@@ -116,6 +125,7 @@ struct RegisterView: View {
                             Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
+                                .accessibilityLabel("Username error: \(error)")
                         }
                     }
 
@@ -123,13 +133,17 @@ struct RegisterView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Enter Email")
                             .fontWeight(.medium)
+                            .accessibilityHidden(true)
                         HStack {
                             Image(systemName: "envelope.fill")
                                 .foregroundColor(.gray)
                                 .frame(width: 24)
+                                .accessibilityHidden(true)
                             TextField("Enter your email address", text: $email)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
+                                .accessibilityLabel("Email address")
+                                .accessibilityHint("Enter your email address")
                         }
                         .padding()
                         .background(Color.clear)
@@ -142,6 +156,7 @@ struct RegisterView: View {
                             Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
+                                .accessibilityLabel("Email error: \(error)")
                         }
                     }
 
@@ -149,14 +164,20 @@ struct RegisterView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Enter Password")
                             .fontWeight(.medium)
+                            .accessibilityHidden(true)
                         HStack {
                             Image(systemName: "lock.fill")
                                 .foregroundColor(.gray)
                                 .frame(width: 24)
+                                .accessibilityHidden(true)
                             if isPasswordVisible {
                                 TextField("Enter your password", text: $password)
+                                    .accessibilityLabel("Password")
+                                    .accessibilityHint("Enter your password")
                             } else {
                                 SecureField("Enter your password", text: $password)
+                                    .accessibilityLabel("Password")
+                                    .accessibilityHint("Enter your password")
                             }
                             Button(action: {
                                 isPasswordVisible.toggle()
@@ -164,6 +185,8 @@ struct RegisterView: View {
                                 Image(systemName: isPasswordVisible ? "eye" : "eye.slash")
                                     .foregroundColor(.gray)
                             }
+                            .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
+                            .accessibilityHint("Double tap to toggle password visibility")
                         }
                         .padding()
                         .background(Color.clear)
@@ -176,6 +199,7 @@ struct RegisterView: View {
                             Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
+                                .accessibilityLabel("Password error: \(error)")
                         }
                     }
 
@@ -183,14 +207,20 @@ struct RegisterView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Enter Confirm Password")
                             .fontWeight(.medium)
+                            .accessibilityHidden(true)
                         HStack {
                             Image(systemName: "lock.fill")
                                 .foregroundColor(.gray)
                                 .frame(width: 24)
+                                .accessibilityHidden(true)
                             if isConfirmPasswordVisible {
                                 TextField("Enter your confirm password", text: $confirmPassword)
+                                    .accessibilityLabel("Confirm password")
+                                    .accessibilityHint("Enter your password again")
                             } else {
                                 SecureField("Enter your confirm password", text: $confirmPassword)
+                                    .accessibilityLabel("Confirm password")
+                                    .accessibilityHint("Enter your password again")
                             }
                             Button(action: {
                                 isConfirmPasswordVisible.toggle()
@@ -198,6 +228,8 @@ struct RegisterView: View {
                                 Image(systemName: isConfirmPasswordVisible ? "eye" : "eye.slash")
                                     .foregroundColor(.gray)
                             }
+                            .accessibilityLabel(isConfirmPasswordVisible ? "Hide confirm password" : "Show confirm password")
+                            .accessibilityHint("Double tap to toggle confirm password visibility")
                         }
                         .padding()
                         .background(Color.clear)
@@ -210,6 +242,7 @@ struct RegisterView: View {
                             Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
+                                .accessibilityLabel("Confirm password error: \(error)")
                         }
                     }
 
@@ -218,13 +251,13 @@ struct RegisterView: View {
                         Text(errorMessage)
                             .font(.caption)
                             .foregroundColor(.red)
+                            .accessibilityLabel("Registration error: \(errorMessage)")
                     }
                 }
                 .padding(.top, 10)
 
                 // Sign up button
                 Button(action: {
-                    // Reset all errors
                     usernameError = nil
                     emailError = nil
                     passwordError = nil
@@ -257,6 +290,7 @@ struct RegisterView: View {
                     if authViewModel.isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .accessibilityLabel("Signing up. Please wait.")
                     } else {
                         Text("Sign up")
                             .fontWeight(.semibold)
@@ -271,17 +305,22 @@ struct RegisterView: View {
                 .cornerRadius(30)
                 .disabled(!isFormValid)
                 .padding(.top, 15)
+                .accessibilityLabel("Sign up")
+                .accessibilityHint("Double tap to create your account")
 
                 // Already have an account option
                 HStack {
                     Text("Already have an account?")
                         .font(.subheadline)
+                        .accessibilityHidden(true)
                     Button("Sign in") {
                         presentationMode.wrappedValue.dismiss()
                     }
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
+                    .accessibilityLabel("Sign in")
+                    .accessibilityHint("Double tap to go to the sign in screen")
                 }
                 .padding(.bottom, 30)
             }

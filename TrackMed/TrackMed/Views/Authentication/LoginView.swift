@@ -19,7 +19,6 @@ struct LoginView: View {
     @State private var showPassword = false
     @State private var showLoginAlert = false
 
-
     private var shouldAutoTriggerBiometrics: Bool {
         UserDefaults.standard.bool(forKey: "biometricEnabled") &&
         UserDefaults.standard.string(forKey: "biometricEmail") != nil &&
@@ -35,6 +34,8 @@ struct LoginView: View {
                     .frame(width: 80, height: 80)
                     .foregroundColor(.blue)
                     .padding(.top, 30)
+                    .accessibilityLabel("TrackMed App Logo")
+                    .accessibilityHint("Welcome to TrackMed")
 
                 VStack(alignment: .leading, spacing: 8){
                     Text("Hello")
@@ -49,15 +50,20 @@ struct LoginView: View {
                         .padding(.top, 10)
                 }
                 .padding(.bottom, 40)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Hello there! Sign in now and start exploring all that our app has to offer. We're excited to welcome you to our community.")
 
                 // Email field
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "envelope")
                             .foregroundColor(.black)
+                            .accessibilityHidden(true)
                         TextField("Email", text: $email)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
+                            .accessibilityLabel("Email address")
+                            .accessibilityHint("Enter your email address")
                     }
                     .padding()
                     .overlay(
@@ -71,10 +77,15 @@ struct LoginView: View {
                     HStack {
                         Image(systemName: "lock")
                             .foregroundColor(.black)
+                            .accessibilityHidden(true)
                         if showPassword {
                             TextField("Password", text: $password)
+                                .accessibilityLabel("Password")
+                                .accessibilityHint("Enter your password")
                         } else {
                             SecureField("Password", text: $password)
+                                .accessibilityLabel("Password")
+                                .accessibilityHint("Enter your password")
                         }
                         Button(action: {
                             showPassword.toggle()
@@ -82,6 +93,8 @@ struct LoginView: View {
                             Image(systemName: showPassword ? "eye" : "eye.slash")
                                 .foregroundColor(.gray)
                         }
+                        .accessibilityLabel(showPassword ? "Hide password" : "Show password")
+                        .accessibilityHint("Double tap to toggle password visibility")
                     }
                     .padding()
                     .overlay(
@@ -104,24 +117,28 @@ struct LoginView: View {
                         HStack {
                             Image(systemName: rememberMe ? "checkmark.square.fill" : "square")
                                 .foregroundColor(rememberMe ? .blue : .gray)
+                                .accessibilityHidden(true)
                             Text("Remember me")
                                 .font(.subheadline)
                                 .foregroundStyle(Color(.black))
                         }
                     }
+                    .accessibilityLabel("Remember me checkbox")
+                    .accessibilityValue(rememberMe ? "Checked" : "Unchecked")
+                    .accessibilityHint("Double tap to toggle remember me")
 
                     Spacer()
 
                     Button("Forgot Password?") {
-                        // Handle forgot password
                         showForgotPassword = true
                     }
                     .font(.subheadline)
                     .foregroundColor(.blue)
+                    .accessibilityLabel("Forgot Password")
+                    .accessibilityHint("Double tap to reset your password")
                 }
                 .padding(.vertical, 8)
                 .padding(.bottom, 80)
-               
 
                 // Sign in button
                 Button(action: {
@@ -130,6 +147,7 @@ struct LoginView: View {
                     if authViewModel.isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .accessibilityLabel("Signing in. Please wait.")
                     } else {
                         Text("Sign in")
                             .fontWeight(.semibold)
@@ -141,6 +159,8 @@ struct LoginView: View {
                 .background(Color.blue)
                 .cornerRadius(50)
                 .disabled(email.isEmpty || password.isEmpty || authViewModel.isLoading)
+                .accessibilityLabel("Sign in")
+                .accessibilityHint("Double tap to sign in to your account")
 
                 // Biometric error display
                 if showBiometricError, let biometricErrorMessage = biometricErrorMessage {
@@ -148,19 +168,23 @@ struct LoginView: View {
                         .font(.caption)
                         .foregroundColor(.red)
                         .padding(.top, 4)
+                        .accessibilityLabel("Biometric authentication error")
+                        .accessibilityHint(biometricErrorMessage)
                 }
 
                 // Sign up option
                 HStack {
                     Text("Don't have an account?")
                         .font(.subheadline)
-
+                        .accessibilityHidden(true)
                     Button("Sign up") {
                         showRegister = true
                     }
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.blue)
+                    .accessibilityLabel("Sign up")
+                    .accessibilityHint("Double tap to create a new account")
                 }
 
                 Spacer()
@@ -176,25 +200,18 @@ struct LoginView: View {
                     .environmentObject(authViewModel)
             }
             .onAppear {
-                print("shouldAutoTriggerBiometrics: \(shouldAutoTriggerBiometrics)")
-                print("biometricEnabled: \(UserDefaults.standard.bool(forKey: "biometricEnabled"))")
-                print("biometricEmail: \(UserDefaults.standard.string(forKey: "biometricEmail") ?? "nil")")
-                print("Biometric Type: \(BiometricAuthService.biometricType())")
-                print("isAuthenticated: \(authViewModel.isAuthenticated)")
-
                 if shouldAutoTriggerBiometrics && !authViewModel.isAuthenticated && BiometricAuthService.biometricType() != .none {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         authViewModel.authenticateWithBiometrics { success in
-                            print("Biometric result: \(success)")
                             if !success {
                                 biometricErrorMessage = authViewModel.errorMessage
                                 showBiometricError = true
                             }
-                            // If success, the AuthViewModel's isAuthenticated flag should handle navigation
                         }
                     }
                 }
-            }.alert("Login Error", isPresented: $showLoginAlert, actions: {
+            }
+            .alert("Login Error", isPresented: $showLoginAlert, actions: {
                 Button("OK", role: .cancel) {
                     authViewModel.errorMessage = nil
                 }

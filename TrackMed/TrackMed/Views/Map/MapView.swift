@@ -71,7 +71,7 @@ struct MapView: View {
                                 mapViewModel.fetchNearbyWellnessCenters()
                             }
                         }
-                        .presentationDetents([.medium]) // Adjust the size of the sheet as needed
+                        .presentationDetents([.medium])
                     }
                 }
                 .padding(.horizontal)

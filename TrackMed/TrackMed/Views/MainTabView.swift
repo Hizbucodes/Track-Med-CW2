@@ -57,7 +57,7 @@ struct CustomTabBar: View {
                 iconName: "house.fill",
                 isSelected: selectedTab == 0,
                 action: { selectedTab = 0 }
-            )
+            ).accessibilityLabel("Home Screen")
             
             Spacer()
             
@@ -66,7 +66,7 @@ struct CustomTabBar: View {
                 iconName: "paperplane.fill",
                 isSelected: selectedTab == 1,
                 action: { selectedTab = 1 }
-            )
+            ).accessibilityLabel("Map Screen")
             
             Spacer()
             
@@ -75,7 +75,7 @@ struct CustomTabBar: View {
                 iconName: "person.fill",
                 isSelected: selectedTab == 2,
                 action: { selectedTab = 2 }
-            )
+            ).accessibilityLabel("Profile Screen")
             
             Spacer()
         }

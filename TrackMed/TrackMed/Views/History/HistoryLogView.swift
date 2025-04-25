@@ -63,13 +63,10 @@ struct HistoryLogView: View {
     var filteredAppointments: [Appointment] {
         switch selectedFilter {
         case .missed:
-            // Missed: scheduled appointments in the past
             return appointmentViewModel.missedAppointments
         case .taken:
-            // Taken: completed appointments
             return appointmentViewModel.completedAppointments
         default:
-            // All: show all appointments
             return appointmentViewModel.appointments
         }
     }
@@ -77,86 +74,112 @@ struct HistoryLogView: View {
     // MARK: - View
 
     var body: some View {
-        HStack {
-            Button(action: {
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.blue)
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.white)
-                        .font(.system(size: 18))
-                }
-            }
-            .padding(.trailing, 10)
-            
-            Text("History Log")
-                .font(.title2)
-                .fontWeight(.bold)
-            
-            Spacer()
-        }
-        .padding()
-        .background(Color(red: 0.95, green: 0.97, blue: 1.0))
-        NavigationView {
-            VStack(spacing: 0) {
-                // Filter Tabs
-                HStack(spacing: 0) {
-                    FilterTab(title: "All", isSelected: selectedFilter == nil) {
-                        selectedFilter = nil
-                    }
-                    FilterTab(title: "Taken", isSelected: selectedFilter == .taken) {
-                        selectedFilter = .taken
-                    }
-                    FilterTab(title: "Missed", isSelected: selectedFilter == .missed) {
-                        selectedFilter = .missed
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.blue)
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "arrow.left")
+                            .foregroundColor(.white)
+                            .font(.system(size: 18))
                     }
                 }
-                .padding(.top, 8)
+                .padding(.trailing, 10)
+                .accessibilityLabel("Back")
+                .accessibilityHint("Go back to previous screen")
 
-                // Content
-                if medicationViewModel.isLoading || appointmentViewModel.isLoading {
-                    ProgressView()
-                        .padding(.top, 40)
-                } else if filteredLogs.isEmpty && filteredAppointments.isEmpty {
-                    VStack {
-                        Spacer()
-                        Text("No entries found")
-                            .foregroundColor(.secondary)
-                        Spacer()
+                Text("History Log")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .accessibilityAddTraits(.isHeader)
+
+                Spacer()
+            }
+            .padding()
+            .background(Color(red: 0.95, green: 0.97, blue: 1.0))
+
+            NavigationView {
+                VStack(spacing: 0) {
+                    // Filter Tabs
+                    HStack(spacing: 0) {
+                        FilterTab(title: "All", isSelected: selectedFilter == nil) {
+                            selectedFilter = nil
+                        }
+                        .accessibilityLabel("Show all logs")
+                        .accessibilityHint("Double tap to show all medication and appointment logs")
+                        FilterTab(title: "Taken", isSelected: selectedFilter == .taken) {
+                            selectedFilter = .taken
+                        }
+                        .accessibilityLabel("Show taken logs")
+                        .accessibilityHint("Double tap to show only taken medications and completed appointments")
+                        FilterTab(title: "Missed", isSelected: selectedFilter == .missed) {
+                            selectedFilter = .missed
+                        }
+                        .accessibilityLabel("Show missed logs")
+                        .accessibilityHint("Double tap to show only missed medications and appointments")
                     }
-                } else {
-                    List {
-                        // Medication Logs
-                        if !filteredLogs.isEmpty {
-                            ForEach(sortedGroupKeys, id: \.self) { key in
-                                Section(header: Text(key)) {
-                                    ForEach(groupedLogs[key] ?? []) { log in
-                                        MedicationHistoryRow(log: log)
+                    .padding(.top, 8)
+
+                    // Content
+                    if medicationViewModel.isLoading || appointmentViewModel.isLoading {
+                        ProgressView()
+                            .padding(.top, 40)
+                            .accessibilityLabel("Loading history logs")
+                            .accessibilityHint("Please wait while the history logs are loading")
+                    } else if filteredLogs.isEmpty && filteredAppointments.isEmpty {
+                        VStack {
+                            Spacer()
+                            Text("No entries found")
+                                .foregroundColor(.secondary)
+                                .accessibilityLabel("No entries found")
+                                .accessibilityHint("There are no medication or appointment logs for the selected filter")
+                            Spacer()
+                        }
+                    } else {
+                        List {
+                            // Medication Logs
+                            if !filteredLogs.isEmpty {
+                                ForEach(sortedGroupKeys, id: \.self) { key in
+                                    Section(header:
+                                        Text(key)
+                                            .accessibilityAddTraits(.isHeader)
+                                            .accessibilityLabel(key)
+                                    ) {
+                                        ForEach(groupedLogs[key] ?? []) { log in
+                                            MedicationHistoryRow(log: log)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Appointments
+                            if !filteredAppointments.isEmpty {
+                                Section(header:
+                                    Text("Appointments")
+                                        .accessibilityAddTraits(.isHeader)
+                                        .accessibilityLabel("Appointments")
+                                ) {
+                                    ForEach(filteredAppointments) { appointment in
+                                        AppointmentHistoryRow(appointment: appointment)
                                     }
                                 }
                             }
                         }
-
-                        // Appointments
-                        if !filteredAppointments.isEmpty {
-                            Section(header: Text("Appointments")) {
-                                ForEach(filteredAppointments) { appointment in
-                                    AppointmentHistoryRow(appointment: appointment)
-                                }
-                            }
-                        }
+                        .listStyle(InsetGroupedListStyle())
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("History log list")
                     }
-                    .listStyle(InsetGroupedListStyle())
                 }
-            }
-            .onAppear {
-                if let userId = authViewModel.user?.id {
-                    medicationViewModel.fetchMedicationLogs(for: userId, status: selectedFilter)
-                    appointmentViewModel.fetchAppointments(for: userId)
+                .onAppear {
+                    if let userId = authViewModel.user?.id {
+                        medicationViewModel.fetchMedicationLogs(for: userId, status: selectedFilter)
+                        appointmentViewModel.fetchAppointments(for: userId)
+                    }
                 }
             }
         }
@@ -185,6 +208,9 @@ struct FilterTab: View {
                 )
         }
         .background(Color(.systemBackground))
+        .accessibilityLabel(title)
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        .accessibilityHint("Double tap to filter logs by \(title)")
     }
 }
 
@@ -204,11 +230,9 @@ struct MedicationHistoryRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(log.medicationName)
                     .font(.headline)
-
                 Text(log.dosage)
                     .font(.subheadline)
                     .foregroundColor(.gray)
-
                 Text(timeFormatter.string(from: log.timeScheduled))
                     .font(.caption)
                     .foregroundColor(.gray)
@@ -230,6 +254,9 @@ struct MedicationHistoryRow: View {
                         )
                 )
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(log.medicationName), \(log.dosage), scheduled at \(timeFormatter.string(from: log.timeScheduled)), status: \(log.status.rawValue)")
+        .accessibilityHint("Medication log entry")
     }
 }
 
@@ -270,5 +297,8 @@ struct AppointmentHistoryRow: View {
                         .fill(appointment.status == .completed ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
                 )
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(appointment.doctorName), \(appointment.specialty), at \(appointment.hospital), on \(appointment.date.formatted(date: .abbreviated, time: .shortened)), status: \(appointment.status.rawValue)\(appointment.notes != nil && !appointment.notes!.isEmpty ? ", notes: \(appointment.notes!)" : "")")
+        .accessibilityHint("Appointment log entry")
     }
 }

@@ -48,15 +48,14 @@ class MapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager.startUpdatingLocation()
     }
 
-    // In MapViewModel.swift:
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last, !hasFetchedOnce else { return }
-        print("📍 Raw location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
         DispatchQueue.main.async {
             self.userLocation = location.coordinate
             self.region = MKCoordinateRegion(
                 center: location.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) // Wider span
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
             )
             
             if self.showType == .pharmacy {

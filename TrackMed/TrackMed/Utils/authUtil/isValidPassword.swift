@@ -8,7 +8,6 @@
 import Foundation
 
 func isValidPassword(_ password: String) -> Bool {
-    // Example: at least 6 characters (Firebase minimum), at least one number
     let passwordRegEx = "^(?=.*[0-9]).{6,}$"
     let passwordPred = NSPredicate(format: "SELF MATCHES %@", passwordRegEx)
     return passwordPred.evaluate(with: password)

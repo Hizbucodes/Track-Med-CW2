@@ -31,7 +31,6 @@ struct AddMedicationView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom header to match the image
             ZStack {
                 Color(red: 0.95, green: 0.97, blue: 1.0)
                     .edgesIgnoringSafeArea(.top)
@@ -65,7 +64,7 @@ struct AddMedicationView: View {
             .frame(height: 68)
             
             
-            // Rest of your scrollview content
+            
             ScrollView {
                 VStack(spacing: 20) {
                     // Medication Details
@@ -78,6 +77,8 @@ struct AddMedicationView: View {
                             Image(systemName: "pill.fill")
                                 .foregroundColor(.gray)
                             TextField("e.g. amoxicillin", text: $name)
+                                .accessibilityLabel("Medication name")
+                                    .accessibilityHint("Enter the name of your medication")
                                 .font(.body)
                         }
                         .padding()
@@ -98,6 +99,8 @@ struct AddMedicationView: View {
                             Image(systemName: "scalemass.fill")
                                 .foregroundColor(.gray)
                             TextField("e.g. 500mg", text: $dosage)
+                                .accessibilityLabel("Dosage")
+                                    .accessibilityHint("Enter the dosage for your medication")
                                 .font(.body)
                         }
                         .padding()
@@ -134,6 +137,9 @@ struct AddMedicationView: View {
                                     .background(selectedFrequency == frequency ? Color.blue.opacity(0.1) : Color(.systemGray6))
                                     .cornerRadius(15)
                                 }
+                                .accessibilityLabel(frequency.rawValue)
+                                .accessibilityValue(selectedFrequency == frequency ? "Selected" : "Not selected")
+                                .accessibilityHint(selectedFrequency == frequency ? "Currently selected" : "Double tap to select \(frequency.rawValue)")
                                 .buttonStyle(PlainButtonStyle())
                             }
                         }
@@ -164,6 +170,9 @@ struct AddMedicationView: View {
                                     .background(selectedDuration == duration ? Color.blue.opacity(0.1) : Color(.systemGray6))
                                     .cornerRadius(15)
                                 }
+                                .accessibilityLabel(duration.rawValue)
+                                .accessibilityValue(selectedDuration == duration ? "Selected" : "Not selected")
+                                .accessibilityHint(selectedDuration == duration ? "Currently selected" : "Double tap to select \(duration.rawValue)")
                                 .buttonStyle(PlainButtonStyle())
                             }
                         }
@@ -193,6 +202,9 @@ struct AddMedicationView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(15)
                         }
+                        .accessibilityLabel("Starting date")
+                        .accessibilityValue(dateFormatter.string(from: startDate))
+                        .accessibilityHint("Double tap to select a starting date")
                         .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal)
                         .sheet(isPresented: $showingDatePicker) {
@@ -221,6 +233,9 @@ struct AddMedicationView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(15)
                         }
+                        .accessibilityLabel("Starting time")
+                        .accessibilityValue(dateFormatter.string(from: startDate))
+                        .accessibilityHint("Double tap to select a starting time")
                         .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal)
                         .sheet(isPresented: $showingTimePicker) {
@@ -395,7 +410,7 @@ struct AddMedicationView: View {
                 .padding(.top)
             }
         }
-        .navigationBarHidden(true) // Hide the default navigation bar
+        .navigationBarHidden(true)
     }
     
     // Helper function to get appropriate icon for frequency

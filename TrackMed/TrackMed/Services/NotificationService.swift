@@ -12,7 +12,7 @@ class NotificationService {
     static let shared = NotificationService()
     private let notificationCenter = UNUserNotificationCenter.current()
     
-    private init() {}
+    init() {}
     
     func requestPermissions() {
         notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
